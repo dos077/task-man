@@ -3,6 +3,7 @@
     <v-sheet
       class="body"
       tile
+      elevation="2"
       style="width: 320px; padding: 16px;"
       :style="`background-color: ${background}; transition: background .5s;`"
     >

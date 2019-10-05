@@ -1,14 +1,18 @@
 import MakeList from './MakeList';
 
 const MakeProject = ({
-  title, created, nextList, lists,
+  id, title, created, updated, nextList, lists,
 }) => {
   const project = {
     title: title || 'New Project',
     created: created || Date.now(),
+    updated: updated || Date.now(),
     lists: (lists) ? lists.map(l => MakeList(l)) : [MakeList({ id: 1 })],
     nextList: nextList || 2,
   };
+
+  project.id = id || `${project.created}-${Math.floor(Math.random() * 1001)}`;
+
   project.newList = () => {
     const list = MakeList({ id: project.nextList });
     project.lists.push(list);
@@ -44,8 +48,10 @@ const MakeProject = ({
 
   project.save = () => {
     const dump = {
+      id: project.id,
       title: project.title,
       created: project.created,
+      updated: project.updated,
       nextList: project.nextList,
       lists: project.lists.map(l => l.save()),
     };

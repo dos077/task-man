@@ -113,6 +113,7 @@ export default {
       font-size: 48px;
       font-weight: 600;
       line-height: 38px;
+      word-wrap: break-word;
       opacity: .33;
       border: none;
       &:focus {
