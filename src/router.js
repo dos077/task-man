@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Project from './views/Project.vue';
+import Home from './views/Home.vue';
 
 Vue.use(Router);
 
@@ -11,12 +12,17 @@ export default new Router({
     {
       path: '/',
       name: 'home',
+      component: Home,
+    },
+    {
+      path: '/project/:pid',
+      name: 'project',
       component: Project,
     },
     {
-      path: '/project',
-      name: 'project',
-      component: () => import('./views/Project.vue'),
+      path: '/browse',
+      name: 'browse',
+      component: Home,
     },
   ],
 });

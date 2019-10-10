@@ -15,6 +15,18 @@ const LocalStorageController = () => {
     });
   };
 
+  const erase = () => {
+    pArr.forEach((key) => {
+      localStorage.removeItem(key);
+    });
+  };
+
+  const destroy = (pId) => {
+    const projects = read().filter(p => p.id !== pId);
+    erase();
+    write(projects);
+  };
+
   const update = (project) => {
     const projects = read();
     const i = projects.findIndex(p => p.id === project.id);
@@ -25,6 +37,7 @@ const LocalStorageController = () => {
 
   return {
     read,
+    destroy,
     update,
   };
 };

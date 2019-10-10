@@ -27,14 +27,13 @@ const ProjectsController = () => {
 
   const listAll = () => remote.listAll();
 
-
   const loadP0 = () => {
     const dump = local.read()[0];
     data.current = (dump) ? MakeProject(dump) : MakeProject({});
   };
 
   const loadRecents = () => {
-    data.recents = local.read().filter(p => p.id !== data.current.id);
+    data.recents = local.read();
   };
 
   const create = () => {
@@ -52,7 +51,14 @@ const ProjectsController = () => {
     const dump = data.current.save();
     local.update(dump);
     if (remote) await remote.syncProject(dump);
+    loadRecents();
     return true;
+  };
+
+  const destroy = async (pId) => {
+    local.destroy(pId);
+    await remote.destroy(pId);
+    loadRecents();
   };
 
   const load = async (pId) => {
@@ -83,6 +89,7 @@ const ProjectsController = () => {
     create,
     save,
     load,
+    destroy,
   };
 };
 

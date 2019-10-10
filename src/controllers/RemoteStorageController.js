@@ -43,10 +43,20 @@ const RemoteStorageController = (googleApi, folderName = 'task-man-files') => {
     drive.upload(indexId, projects);
   };
 
+  const destroy = async (pId) => {
+    const i = projects.findIndex(p => p.id === pId);
+    if (i < 0) return false;
+    const { fileId } = projects.splice(i, 1)[0];
+    await drive.upload(indexId, projects);
+    const res = await drive.destroy(fileId);
+    return res;
+  };
+
   const loadProject = async (id, fileId) => {
-    const projectFileId = fileId || (await listAll()).find(p => p.id === id);
+    const projectFileId = fileId || (await listAll()).find(p => p.id === id).fileId;
     if (!projectFileId) return null;
-    return JSON.parse(await drive.download(projectFileId));
+    const res = await drive.download(projectFileId);
+    return res;
   };
 
   const syncProject = async (project) => {
@@ -68,7 +78,9 @@ const RemoteStorageController = (googleApi, folderName = 'task-man-files') => {
   };
 
 
-  return { listAll, syncProject, loadProject };
+  return {
+    listAll, syncProject, loadProject, destroy,
+  };
 };
 
 export default RemoteStorageController;

@@ -21,6 +21,9 @@ const FetchQueue = (interval = 100, maxRetries = 5) => {
       if (result.status === 200) {
         return await result.json();
       }
+      if (result.status === 204) {
+        return true;
+      }
       if (result.status === 403) {
         return await newFetch({ url, options, immediate }, multiplier + 1);
       }

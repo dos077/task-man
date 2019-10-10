@@ -7,6 +7,7 @@
       @sign-out="signOut"
       :projects="projects"
       :prefs="prefs"
+      :allProjects="allProjects"
       style="min-height: 100%;"
     ></router-view>
   </v-app>
@@ -27,6 +28,7 @@ export default {
     gapiAuth: null,
     projects: ProjectsController(),
     prefs: Prefs(),
+    allProjects: [],
   }),
   methods: {
     gapiSuccess() {
@@ -34,10 +36,11 @@ export default {
       // eslint-disable-next-line
       this.gapiAuth = Gauth(gapi, this.driveConnected, this.driveDisconnected);
     },
-    driveConnected() {
+    async driveConnected() {
       this.driveOn = true;
       // eslint-disable-next-line
       this.projects.loadRemote(gapi);
+      this.allProjects = await this.projects.listAll();
     },
     driveDisconnected() { this.driveOn = false; },
     signIn() { if (this.gapiAuth) this.gapiAuth.signIn(); },

@@ -1,5 +1,8 @@
 <template>
   <div>
+    <v-dialog v-if="loading">
+      <v-progress-circular color="#e0e0e0"></v-progress-circular>
+    </v-dialog>
     <v-navigation-drawer
       v-model="drawerOn"
       dark
@@ -23,9 +26,8 @@
         @click="noteNew"
         >new project</v-btn>
         <v-btn
-        class="ttl"
-        text
-        color="#fafafa"
+        class="ttl" text color="#fafafa"
+        @click="$router.push('/browse')"
         >Browser</v-btn>
       </div>
       <div class="menu-group">
@@ -127,13 +129,18 @@ export default {
   props: ['gapiOn', 'driveOn', 'projects', 'prefs'],
   data() {
     return {
+      loading: false,
       drawerOn: null,
-      project: this.projects.data.current,
-      recents: this.projects.data.recents,
+      project: {},
+      recents: [],
       sortToggle: (this.prefs.sort === 'date') ? 0 : 1,
     };
   },
   methods: {
+    load() {
+      this.project = this.projects.data.current;
+      this.recents = this.projects.data.recents.filter(p => p.id !== this.project.id);
+    },
     save() {
       this.project.updated = Date.now();
       this.projects.save();
@@ -152,21 +159,31 @@ export default {
     },
     noteNew() {
       this.project = this.projects.create();
+      this.load();
     },
     async noteLoad(pId) {
+      this.loading = true;
       this.drawerOn = false;
       this.save();
       const loadSuccess = await this.projects.load(pId);
-      if (loadSuccess) {
-        this.project = this.projects.data.current;
-        this.recents = this.projects.data.recents;
-      }
+      if (loadSuccess) this.load();
+      this.loading = false;
     },
     showDate(stamp) {
       const date = new Date(stamp);
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
     },
+  },
+  created() {
+    if (this.$route.params && this.$route.params.pid) {
+      if (this.$route.params.pid === 'new') {
+        this.noteNew();
+      } else {
+        this.noteLoad(this.$route.params.pid);
+      }
+    }
+    this.load();
   },
 };
 </script>
