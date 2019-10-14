@@ -1,5 +1,12 @@
 <template>
   <div>
+    <div class="fullscreen" v-if="loading">
+      <v-card height="64" color="#fafafa">
+        <v-card-text><span class="ttl">Syncing with Drive</span>
+          <v-progress-circular indeterminate color="#424242"></v-progress-circular>
+        </v-card-text>
+      </v-card>
+    </div>
     <v-content>
       <div class="recents">
         <section>
@@ -84,8 +91,11 @@ export default {
   props: ['projects', 'driveOn', 'prefs', 'gapiOn', 'allProjects'],
   data() {
     return {
-      recents: this.projects.data.recents,
     };
+  },
+  computed: {
+    loading() { return this.driveOn && this.projects.data.syncing; },
+    recents() { return this.projects.data.recents; },
   },
   methods: {
     dueTasks(proj) {
@@ -105,7 +115,6 @@ export default {
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
     },
-
   },
 };
 </script>

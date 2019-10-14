@@ -37,9 +37,9 @@ export default {
       this.gapiAuth = Gauth(gapi, this.driveConnected, this.driveDisconnected);
     },
     async driveConnected() {
-      this.driveOn = true;
       // eslint-disable-next-line
-      this.projects.loadRemote(gapi);
+      await this.projects.loadRemote(gapi);
+      this.driveOn = true;
       this.allProjects = await this.projects.listAll();
     },
     driveDisconnected() { this.driveOn = false; },
@@ -88,6 +88,21 @@ export default {
     label {
       font-family: 'Cormorant', serif;
       font-weight: 400;
+    }
+  }
+  .fullscreen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.2);
+    span {
+      font-size: 18px;
+      margin-right: 12px;
+      color: #212121;
     }
   }
 </style>

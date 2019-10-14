@@ -5,11 +5,12 @@ import RemoteStorageController from './RemoteStorageController';
 const ProjectsController = () => {
   const local = LocalStorageController();
   let remote = null;
-  const data = { current: null, recents: [] };
+  const data = { current: null, recents: [], syncing: false };
 
   const loadRemote = async (googleApi) => {
     if (remote) return false;
-    remote = RemoteStorageController(googleApi);
+    data.syncing = true;
+    remote = await RemoteStorageController(googleApi);
     const syncOps = [];
     local.read().forEach(async (p) => {
       syncOps.push(remote.syncProject(p));
@@ -18,6 +19,7 @@ const ProjectsController = () => {
     newers.forEach((newer) => {
       if (newer) local.update(newer);
     });
+    data.syncing = false;
     return true;
   };
 
@@ -25,7 +27,10 @@ const ProjectsController = () => {
     remote = null;
   };
 
-  const listAll = () => remote.listAll();
+  const listAll = () => {
+    if (remote) return remote.listAll();
+    return [];
+  };
 
   const loadP0 = () => {
     const dump = local.read()[0];
@@ -37,10 +42,6 @@ const ProjectsController = () => {
   };
 
   const create = () => {
-    if (remote) {
-      const locals = local.read();
-      if (locals.length === 3) remote.syncProject(locals[2]);
-    }
     const project = MakeProject({});
     local.update(project.save());
     data.current = project;
@@ -50,14 +51,20 @@ const ProjectsController = () => {
   const save = async () => {
     const dump = data.current.save();
     local.update(dump);
-    if (remote) await remote.syncProject(dump);
+    if (remote) {
+      data.syncing = true;
+      await remote.syncProject(dump);
+      data.syncing = false;
+    }
     loadRecents();
     return true;
   };
 
   const destroy = async (pId) => {
     local.destroy(pId);
+    data.syncing = true;
     await remote.destroy(pId);
+    data.syncing = false;
     loadRecents();
   };
 
@@ -67,7 +74,9 @@ const ProjectsController = () => {
     } else {
       let dump = local.read().find(p => p.id === pId);
       if (!dump && remote) {
+        data.syncing = true;
         dump = await remote.loadProject(pId);
+        data.syncing = false;
       }
       if (dump) {
         data.current = MakeProject(dump);

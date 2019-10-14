@@ -1,6 +1,6 @@
 import GDriveController from '../gapi/gdrive';
 
-const RemoteStorageController = (googleApi, folderName = 'task-man-files') => {
+const RemoteStorageController = async (googleApi, folderName = 'task-man-files') => {
   const drive = GDriveController(googleApi);
   let indexId;
   let projects;
@@ -77,6 +77,7 @@ const RemoteStorageController = (googleApi, folderName = 'task-man-files') => {
     return null;
   };
 
+  await listAll();
 
   return {
     listAll, syncProject, loadProject, destroy,
