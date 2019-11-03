@@ -1,12 +1,5 @@
 <template>
   <div>
-    <div class="fullscreen" v-if="loading">
-      <v-card height="64" color="#fafafa">
-        <v-card-text><span class="ttl">Syncing with Drive</span>
-          <v-progress-circular indeterminate color="#424242"></v-progress-circular>
-        </v-card-text>
-      </v-card>
-    </div>
     <v-navigation-drawer
       v-model="drawerOn"
       dark
@@ -49,9 +42,10 @@
       <div class="menu-group">
         <div class="ttl title">Recent Projects</div>
         <div v-for="(proj, index) in recents" :key="index" class="body">
-          <div class="ttl" style="margin-top: 8px;" @click="noteLoad(proj.id)">
+          <div class="ttl" style="margin-top: 8px;" >
             {{ proj.title }}
-            <v-btn small icon color="#eeeeee"><v-icon>edit</v-icon></v-btn>
+            <v-btn small icon color="#eeeeee" @click="noteLoad(proj.id)">
+              <v-icon>edit</v-icon></v-btn>
           </div>
           <div>
             {{ showDate(proj.updated) }}
@@ -64,7 +58,7 @@
         </div>
         <div v-if="driveOn" class="body">
           Connected<br/>
-          Status: Up-to-date
+          Status: {{ projects.data.syncing ? 'syncing' : 'up-to-date' }}
         </div>
         <v-btn
           v-if="driveOn"
@@ -87,14 +81,12 @@
       </div>
     </v-navigation-drawer>
     <v-app-bar
-      hide-on-scroll
-      :color="(drawerOn) ? '#212121' : '#eeeeee'"
+      height="76px"
+      color="#eeeeee"
       style="padding: 4px 16px 8px;"
       app
     >
-
       <v-app-bar-nav-icon color="#212121" @click="drawerOn = !drawerOn"></v-app-bar-nav-icon>
-
       <v-toolbar-title style="font-size: 24px; color: #212121; padding-left: 8px;">
         <span v-if="!editTitle" class="ttl" @click="editTitle = true">
           {{ project.title }}
@@ -106,9 +98,9 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <span mdAndUp=true class="body label"
-      v-if="!drawerOn && $vuetify.breakpoint.mdAndUp">Sort By</span>
+      v-if="$vuetify.breakpoint.mdAndUp">Sort By</span>
       <v-btn-toggle
-        v-if="!drawerOn && $vuetify.breakpoint.mdAndUp"
+        v-if="$vuetify.breakpoint.mdAndUp"
         color="#212121"
         v-model="sortToggle"
       >
@@ -153,7 +145,7 @@ export default {
     return {
       loading: false,
       drawerOn: null,
-      project: {},
+      project: null,
       recents: [],
       sortToggle: (this.prefs.sort === 'date') ? 0 : 1,
       editTitle: false,
@@ -163,6 +155,7 @@ export default {
     load() {
       this.project = this.projects.data.current;
       this.recents = this.projects.data.recents.filter(p => p.id !== this.project.id);
+      document.title = `Tasks - ${this.project.title}`;
     },
     save() {
       this.project.updated = Date.now();
@@ -188,7 +181,7 @@ export default {
     async noteLoad(pId) {
       this.loading = true;
       this.drawerOn = false;
-      this.save();
+      if (this.project) this.save();
       const loadSuccess = await this.projects.load(pId);
       if (loadSuccess) this.load();
       this.loading = false;

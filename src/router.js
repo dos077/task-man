@@ -19,10 +19,5 @@ export default new Router({
       name: 'project',
       component: Project,
     },
-    {
-      path: '/browse',
-      name: 'browse',
-      component: Home,
-    },
   ],
 });

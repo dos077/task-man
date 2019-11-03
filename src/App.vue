@@ -1,5 +1,12 @@
 <template>
   <v-app style="background-color: #e0e0e0;">
+    <div class="fullscreen" v-if="loading">
+      <v-card height="64" color="#fafafa">
+        <v-card-text><span class="ttl">Loading Google Drive Sync</span>
+          <v-progress-circular indeterminate color="#424242"></v-progress-circular>
+        </v-card-text>
+      </v-card>
+    </div>
     <router-view
       :gapiOn="gapiOn"
       :driveOn="driveOn"
@@ -9,7 +16,15 @@
       :prefs="prefs"
       :allProjects="allProjects"
       style="min-height: 100%;"
-    ></router-view>
+      @load-start="loading = true"
+      @load-done="loading = false"
+    >
+    </router-view>
+    <v-snackbar v-show="!loading" v-model="projects.data.syncing">
+      <v-progress-linear
+      indeterminate color="#fafafa"
+      ></v-progress-linear>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -29,6 +44,7 @@ export default {
     projects: ProjectsController(),
     prefs: Prefs(),
     allProjects: [],
+    loading: false,
   }),
   methods: {
     gapiSuccess() {
@@ -37,10 +53,12 @@ export default {
       this.gapiAuth = Gauth(gapi, this.driveConnected, this.driveDisconnected);
     },
     async driveConnected() {
+      this.loading = true;
       // eslint-disable-next-line
       await this.projects.loadRemote(gapi);
       this.driveOn = true;
       this.allProjects = await this.projects.listAll();
+      this.loading = false;
     },
     driveDisconnected() { this.driveOn = false; },
     signIn() { if (this.gapiAuth) this.gapiAuth.signIn(); },
@@ -104,5 +122,8 @@ export default {
       margin-right: 12px;
       color: #212121;
     }
+  }
+  .v-overlay {
+    z-index: 6 !important;
   }
 </style>

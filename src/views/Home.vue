@@ -1,12 +1,5 @@
 <template>
   <div>
-    <div class="fullscreen" v-if="loading">
-      <v-card height="64" color="#fafafa">
-        <v-card-text><span class="ttl">Syncing with Drive</span>
-          <v-progress-circular indeterminate color="#424242"></v-progress-circular>
-        </v-card-text>
-      </v-card>
-    </div>
     <v-content>
       <div class="recents">
         <section>
@@ -65,7 +58,8 @@
               :color="hover ? '#fafafa' : '#eeeeee'" class="sheet"
               :elevation="hover ? 3 : 0" tile
             >
-              <footer class="body" :class="{'active': hover}" style="background-color: #fff9c4">
+              <footer class="body" :class="{'active': hover}"
+                :style="`background-color: ${time2color(proj.updated)}`">
                 {{ showDate(proj.updated) }}
                 <v-btn v-if="hover" class="ttl" color="#212121" text
                   @click="$router.push(`/project/${proj.id}`)"
@@ -115,6 +109,22 @@ export default {
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
     },
+    time2color(time) {
+      const colors = [
+        '#ffe0b2',
+        '#fff9c4',
+        '#dcedc8',
+        '#b2ebf2',
+        '#eeeeee',
+      ];
+      const date = new Date(time);
+      const now = Date.now();
+      const delta = Math.floor((now - date) / (1000 * 60 * 60 * 72));
+      return (delta < 4) ? colors[delta] : colors[4];
+    },
+  },
+  mounted() {
+    document.title = 'Taskman';
   },
 };
 </script>
