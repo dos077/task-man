@@ -24,7 +24,7 @@ const router = new Router({
       meta: { authNotRequired: true },
     },
     {
-      path: 'Login',
+      path: '/Login',
       component: Login,
       meta: { authNotRequired: true },
     },

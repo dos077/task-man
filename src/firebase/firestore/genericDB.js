@@ -22,7 +22,7 @@ const convertObjectTimestampPropertiesToDate = (obj) => {
 
 export default (collectionPath) => {
   const create = async (data, id = null) => {
-    const collectionRef = (await loadFirestore()).collection(this.collectionPath);
+    const collectionRef = (await loadFirestore()).collection(collectionPath);
     const serverTimestamp = firebase.firestore.FieldValue.serverTimestamp();
 
     const dataToCreate = {
@@ -59,7 +59,7 @@ export default (collectionPath) => {
 
   const updateMeta = async (newMeta) => {
     await (await loadFirestore())
-      .collection(this.collectionPath)
+      .collection(collectionPath)
       .doc('meta')
       .set(newMeta);
   };
@@ -104,7 +104,7 @@ export default (collectionPath) => {
     const updateTimestamp = firebase.firestore.FieldValue.serverTimestamp();
 
     await (await loadFirestore())
-      .collection(this.collectionPath)
+      .collection(collectionPath)
       .doc(id)
       .update({
         ...clonedData,
@@ -119,7 +119,7 @@ export default (collectionPath) => {
   };
 
   const remove = async id => (await loadFirestore())
-    .collection(this.collectionPath)
+    .collection(collectionPath)
     .doc(id)
     .delete();
 

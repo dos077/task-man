@@ -3,7 +3,7 @@ import UsersDB from '@/firebase/firestore/usersDB';
 const newUserFromFirebaseAuth = async (firebaseAuthUser) => {
   const providerData = firebaseAuthUser.providerData[0];
   const { displayName, photoURL, email } = providerData;
-  const userDb = new UsersDB();
+  const userDb = UsersDB();
   const user = {
     displayName,
     photoURL,
@@ -15,7 +15,7 @@ const newUserFromFirebaseAuth = async (firebaseAuthUser) => {
 
 export default {
   login: async ({ commit }, firebaseAuthUser) => {
-    const userFromFirebase = await new UsersDB().read(firebaseAuthUser.uid);
+    const userFromFirebase = await UsersDB().read(firebaseAuthUser.uid);
 
     const user = userFromFirebase == null
       ? await newUserFromFirebaseAuth(firebaseAuthUser)
