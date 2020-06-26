@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import store from '@/store';
 import Project from './views/Project.vue';
+import Projects from './views/Projects.vue';
 import Home from './views/Home.vue';
 import CheckLogin from './views/CheckLogin.vue';
 import Login from './views/Login.vue';
@@ -16,6 +17,7 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: Home,
+      meta: { authNotRequired: true },
     },
     {
       path: '/check-login',
@@ -24,9 +26,13 @@ const router = new Router({
       meta: { authNotRequired: true },
     },
     {
-      path: '/Login',
+      path: '/login',
       component: Login,
       meta: { authNotRequired: true },
+    },
+    {
+      path: '/projects',
+      component: Projects,
     },
     {
       path: '/project/:pid',
