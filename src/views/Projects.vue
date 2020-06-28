@@ -8,7 +8,8 @@
             <v-sheet
               :color="hover ? '#fafafa' : '#e0e0e0'" class="sheet"
               :elevation="hover ? 3 : 0" tile
-              @click="$router.push('/project/new')"
+              @click="newProject"
+              style="cursor: pointer"
             >
               <p style="text-align: center;">
                 <v-icon color="#212121" style="font-size: 72px; margin: 8px auto;">
@@ -79,19 +80,26 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
+import ProjectTemplate from '@/template/project';
 
 export default {
   name: 'Browser',
-  props: ['projects', 'driveOn', 'prefs', 'gapiOn', 'allProjects'],
   data() {
     return {
+      recents: [],
     };
   },
   computed: {
-    loading() { return this.driveOn && this.projects.data.syncing; },
-    recents() { return this.projects.data.recents; },
+    ...mapState('projects', { projects: 'items', current: 'current' }),
   },
   methods: {
+    ...mapActions('projects', { createProject: 'create' }),
+    async newProject() {
+      const blank = ProjectTemplate();
+      await this.createProject(blank);
+      // this.$router.push({ path: `/projects/${this.current.id}` });
+    },
     dueTasks(proj) {
       const dues = [];
       proj.lists.forEach((list) => {
