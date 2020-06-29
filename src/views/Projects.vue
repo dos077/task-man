@@ -81,7 +81,7 @@ export default {
     ...mapState('projects', { projects: 'items', current: 'current' }),
   },
   methods: {
-    ...mapActions('projects', { createProject: 'create' }),
+    ...mapActions('projects', { createProject: 'create', readAll: 'readAll' }),
     async newProject() {
       const blank = ProjectTemplate();
       await this.createProject(blank);
@@ -120,6 +120,7 @@ export default {
   },
   mounted() {
     document.title = 'Taskman';
+    if (!this.projects) this.readAll();
   },
 };
 </script>
