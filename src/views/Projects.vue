@@ -53,7 +53,7 @@
                   @click="$router.push(`/project/${proj.id}`)"
                 >open</v-btn>
                 <v-btn v-if="hover" class="ttl" color="#c62828" text
-                  @click="projects.destroy(proj.id)"
+                  @click="deleteProject(proj.id)"
                 >delete</v-btn>
               </footer>
               <div class="ttl title">{{ proj.title }}</div>
@@ -81,7 +81,7 @@ export default {
     ...mapState('projects', { projects: 'items', current: 'current' }),
   },
   methods: {
-    ...mapActions('projects', { createProject: 'create', readAll: 'readAll' }),
+    ...mapActions('projects', { createProject: 'create', readAll: 'getAll', deleteProject: 'delete' }),
     async newProject() {
       const blank = ProjectTemplate();
       await this.createProject(blank);

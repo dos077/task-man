@@ -3,9 +3,7 @@
     <v-container fill-height>
       <v-row align-content="center" justify="center">
         <v-col>
-          Task-man is a free and open source passion project that's built on the Vue framework, Vuetify UI library and Firebase cloud database for easy syncing across any devices.
-
-          This live build is already setup with a test firebase account. You can try it out by login and sign up with your Google account.
+          Home page placeholder.
         </v-col>
       </v-row>
       <v-row>
@@ -16,7 +14,20 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'Home',
+  computed: {
+    ...mapState('authentication', ['user']),
+  },
+  watch: {
+    user: {
+      handler(to) {
+        if (to) this.$router.push({ path: '/projects' });
+      },
+      immediate: true,
+    },
+  },
 };
 </script>

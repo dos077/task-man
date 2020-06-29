@@ -21,9 +21,9 @@
           v-model="sortToggle"
         >
           <v-btn height="36" class="ttl"
-          @click="prefs.sort = 'date'">Date</v-btn>
+          @click="sortToggle = 0">Date</v-btn>
           <v-btn height="36" class="ttl"
-          @click="prefs.sort = 'priority'">Priority</v-btn>
+          @click="sortToggle = 1">Priority</v-btn>
         </v-btn-toggle>
       </div>
       <div class="menu-group">
@@ -36,7 +36,7 @@
         >new project</v-btn>
         <v-btn
         class="ttl" text color="#fafafa"
-        @click="$router.push('/')"
+        @click="$router.push('/projects')"
         >Browser</v-btn>
       </div>
       <div class="menu-group">
@@ -51,33 +51,6 @@
             {{ showDate(proj.updated) }}
           </div>
         </div>
-      </div>
-      <div v-if="gapiOn" class="menu-group">
-        <div class="ttl title">
-          Google Drive
-        </div>
-        <div v-if="driveOn" class="body">
-          Connected<br/>
-          Status: {{ projects.data.syncing ? 'syncing' : 'up-to-date' }}
-        </div>
-        <v-btn
-          v-if="driveOn"
-          text
-          class="ttl"
-          color="#f44336"
-          @click="$emit('sign-out')"
-        >
-          Disconnect
-        </v-btn>
-        <v-btn
-          v-if="!driveOn"
-          text
-          class="ttl"
-          color="#dcedc8"
-          @click="$emit('sign-in')"
-        >
-          Connect
-        </v-btn>
       </div>
     </v-navigation-drawer>
     <v-app-bar
@@ -133,25 +106,40 @@
 </template>
 
 <script>
-import List from './List.vue';
+import { mapState, mapActions } from 'vuex';
+import List from './components/List.vue';
 
 export default {
   name: 'Project',
   components: {
     List,
   },
-  props: ['gapiOn', 'driveOn', 'projects', 'prefs'],
   data() {
     return {
       loading: false,
       drawerOn: null,
-      project: null,
       recents: [],
-      sortToggle: (this.prefs.sort === 'date') ? 0 : 1,
+      sortToggle: 0,
       editTitle: false,
     };
   },
+  computed: {
+    ...mapState('projects', { project: 'current' }),
+  },
+  watch: {
+    '$route.params.id': {
+      async handler(to) {
+        if (to !== this.project.id) {
+          await this.readProject(to);
+          await this.loadNotes();
+        }
+      },
+      immediate: true,
+    },
+  },
   methods: {
+    ...mapActions('projects', { readProject: 'read' }),
+    ...mapActions('notes', { loadNotes: 'getAll' }),
     load() {
       this.project = this.projects.data.current;
       this.recents = this.projects.data.recents.filter(p => p.id !== this.project.id);
