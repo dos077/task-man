@@ -4,8 +4,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
   function authenticated() { return request.auth.uid != null }
 
-    match /users/{userId} {
-       allow get, create, update, delete: if authenticated() && request.auth.uid == userId;
+    match /users/{userId}/{project=**} {
+    	allow read: if authenticated() && request.auth.uid == userId;
+      allow write: if authenticated() && request.auth.uid == userId;
     }
   }
 }

@@ -39,21 +39,8 @@
       </div>
       <div>
         <section>
-          <div class="section-title ttl">Drive {{ driveOn ? 'On' : 'Off'}}</div>
-          <div style="margin-bottom: 16px;">
-            <v-btn v-if="driveOn" text color="#c62828"
-              @click="$emit('sign-out')"
-            >disconnect</v-btn>
-            <v-btn v-if="!driveOn" color="#dcedc8"
-              @click="$emit('sign-in')"
-            >connect</v-btn>
-          </div>
-          <p v-if="!driveOn" class="body">
-            Connect to google drive to allow cloud save. Th
-            is app can only hold three most recent pro
-            jects in temporary storage.
-          </p>
-          <v-hover v-for="proj in allProjects" :key="proj.id"
+          <div class="section-title ttl">All Projects</div>
+          <v-hover v-for="proj in projects" :key="proj.id"
           v-slot:default="{ hover }">
             <v-sheet
               :color="hover ? '#fafafa' : '#eeeeee'" class="sheet"
