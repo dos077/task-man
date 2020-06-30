@@ -128,6 +128,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'NoteForm',
   props: ['note'],
@@ -154,9 +156,11 @@ export default {
     },
   },
   methods: {
+    ...mapActions('notes', { update: 'update', delNote: 'delete' }),
     finished() {
       this.noteCopy.due = null;
-      this.$emit('finish-note', this.noteCopy);
+      this.noteCopy.listOrder += 1;
+      this.update(this.noteCopy);
     },
   },
 };
