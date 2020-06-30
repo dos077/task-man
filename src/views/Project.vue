@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="project">
     <v-navigation-drawer
       v-model="drawerOn"
       dark
@@ -32,7 +32,6 @@
         class="ttl"
         text
         color="#dcedc8"
-        @click="noteNew"
         >new project</v-btn>
         <v-btn
         class="ttl" text color="#fafafa"
@@ -44,7 +43,7 @@
         <div v-for="(proj, index) in recents" :key="index" class="body">
           <div class="ttl" style="margin-top: 8px;" >
             {{ proj.title }}
-            <v-btn small icon color="#eeeeee" @click="noteLoad(proj.id)">
+            <v-btn small icon color="#eeeeee">
               <v-icon>edit</v-icon></v-btn>
           </div>
           <div>
@@ -66,7 +65,7 @@
         </span>
         <v-text-field v-if="editTitle" autofocus
           style="font-size: 18px; margin-top: 12px;"
-          class="ttl" v-model="project.title" @blur="save">
+          class="ttl" v-model="newTitle" @blur="saveTitle">
         </v-text-field>
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -78,9 +77,9 @@
         v-model="sortToggle"
       >
         <v-btn height="36" class="ttl"
-        @click="prefs.sort = 'date'">Date</v-btn>
+        @click="sortToggle = 0">Date</v-btn>
         <v-btn height="36" class="ttl"
-        @click="prefs.sort = 'priority'">Priority</v-btn>
+        @click="sortToggle = 1">Priority</v-btn>
       </v-btn-toggle>
     </v-app-bar>
     <v-content
@@ -92,11 +91,8 @@
           class="lists"
           :style="`width: ${360 * project.lists.length}px;`"
         >
-          <list v-for="list in project.lists" :key="list.id" :list="list" :sort="prefs.sort"
-            @note-done="noteDone"
-            @note-rewind="noteRewind"
-            @note-del="noteDel"
-            @new-update="save"
+          <list
+            v-for="(list, i) in lists" :key="i" :notes="list" :sort="sortToggle" :index="i"
           >
           </list>
         </div>
@@ -121,74 +117,52 @@ export default {
       recents: [],
       sortToggle: 0,
       editTitle: false,
+      newTitle: '',
     };
   },
   computed: {
     ...mapState('projects', { project: 'current' }),
+    ...mapState('notes', { notes: 'items' }),
+    lists() {
+      if (!this.notes || this.notes.length === 0) return [[]];
+      const arr = [];
+      this.notes.forEach((n) => {
+        if (arr[n.listIndex]) arr.push(n);
+        else arr[n.listIndex] = [n];
+      });
+      return arr;
+    },
   },
   watch: {
-    '$route.params.id': {
+    $route: {
       async handler(to) {
-        if (to !== this.project.id) {
-          await this.readProject(to);
+        const newId = to.params.pid;
+        if (!newId) return;
+        if (!this.project || newId !== this.project.id) {
+          await this.readProject(newId);
           await this.loadNotes();
+          this.newTitle = this.project.title;
         }
       },
       immediate: true,
     },
   },
   methods: {
-    ...mapActions('projects', { readProject: 'read' }),
+    ...mapActions('projects', { readProject: 'read', updateProject: 'update' }),
     ...mapActions('notes', { loadNotes: 'getAll' }),
-    load() {
-      this.project = this.projects.data.current;
-      this.recents = this.projects.data.recents.filter(p => p.id !== this.project.id);
-      document.title = `Tasks - ${this.project.title}`;
-    },
-    save() {
-      this.project.updated = Date.now();
-      this.projects.save();
+    async saveTitle() {
       this.editTitle = false;
-    },
-    noteDone(note) {
-      this.project.noteDone(note);
-      this.save();
-    },
-    noteRewind(note) {
-      this.project.noteDone(note, -1);
-      this.save();
-    },
-    noteDel() {
-      this.project.trimLists();
-      this.save();
-    },
-    noteNew() {
-      this.project = this.projects.create();
-      this.load();
-    },
-    async noteLoad(pId) {
-      this.loading = true;
-      this.drawerOn = false;
-      if (this.project) this.save();
-      const loadSuccess = await this.projects.load(pId);
-      if (loadSuccess) this.load();
-      this.loading = false;
+      if (!this.newTitle === this.project.title) {
+        const updated = { ...this.project };
+        updated.title = this.newTitle;
+        await this.updateProject(updated);
+      }
     },
     showDate(stamp) {
       const date = new Date(stamp);
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
     },
-  },
-  created() {
-    if (this.$route.params && this.$route.params.pid) {
-      if (this.$route.params.pid === 'new') {
-        this.noteNew();
-      } else {
-        this.noteLoad(this.$route.params.pid);
-      }
-    }
-    this.load();
   },
 };
 </script>

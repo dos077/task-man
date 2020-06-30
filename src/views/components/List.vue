@@ -2,13 +2,13 @@
   <div class="list-container">
     <v-slide-x-transition hide-on-leave>
       <span v-if="!editTitle" class="ttl list-title" @click="editTitle = true">
-        {{ list.title || 'No Title' }}
+        {{ listTitle || 'No Title' }}
       </span>
       <v-textarea
         v-if="editTitle"
         autofocus
         class="ttl"
-        v-model="list.title"
+        v-model="newTitle"
         row-height="36"
         style="margin-left: 24px;; font-size: 24px; width: 200px;"
         auto-grow
@@ -45,31 +45,38 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
 import Note from './Note.vue';
+import BuildNote from '@/template/note';
 
 export default {
   name: 'List',
-  props: ['list', 'sort'],
+  props: ['notes', 'index', 'sort'],
   data() {
     return {
       editTitle: false,
+      newTitle: '',
     };
   },
   components: {
     Note,
   },
   computed: {
+    ...mapState('projects', { project: 'current' }),
+    listTitle() {
+      return this.project.lists[this.index];
+    },
     groups() {
       let groups = [];
-      if (this.sort === 'date') {
+      if (this.sort === 0) {
         this.sortNotes();
-        groups = [this.list.notes];
+        groups = [this.notes];
       }
-      if (this.sort === 'priority') {
+      if (this.sort === 1) {
         this.sortNotes();
         const pg = [];
         [4, 3, 2, 1, 0].forEach((c) => {
-          const notes = this.list.notes.filter(n => n.color === c);
+          const notes = this.notes.filter(n => n.color === c);
           if (notes.length > 0) pg.push(notes);
         });
         groups = pg;
@@ -77,25 +84,39 @@ export default {
       return groups;
     },
   },
+  watch: {
+    listTitle: {
+      handler(to) { this.newTitle = to; },
+      immediate: true,
+    },
+  },
   methods: {
+    ...mapActions('projects', { updateProject: 'update' }),
+    ...mapActions('notes', { createNote: 'create' }),
+    async saveTitle() {
+      this.editTitle = false;
+      if (this.newTitle && this.newTitle !== this.listTitle) {
+        const updated = { ...this.project };
+        const updatedLists = [...updated.lists];
+        updatedLists[this.index] = this.newTitle;
+        updated.lists = updatedLists;
+        await this.updateProject(updated);
+      }
+    },
     sortNotes() {
-      this.list.notes.sort((a, b) => {
+      this.notes.sort((a, b) => {
         const aDue = (a.due) ? new Date(a.due) : 0;
         const bDue = (b.due) ? new Date(b.due) : 0;
         return aDue - bDue;
       });
     },
     newNote() {
-      this.list.newNote();
-      this.$emit('new-update');
+      const newNote = BuildNote(this.index);
+      this.createNote(newNote);
     },
     deleteNote(noteId) {
       this.list.delNote(noteId);
       this.$emit('note-del');
-    },
-    saveTitle() {
-      this.editTitle = false;
-      this.$emit('new-update');
     },
   },
 };
