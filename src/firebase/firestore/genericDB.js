@@ -8,7 +8,8 @@ const convertObjectTimestampPropertiesToDate = (obj) => {
     .filter(prop => obj[prop] instanceof Object)
     .forEach((prop) => {
       if (obj[prop] instanceof firebase.firestore.Timestamp) {
-        newObj[prop] = obj[prop].toDate();
+        const convertedDate = obj[prop].toDate();
+        newObj[prop] = convertedDate;
       } else {
         convertObjectTimestampPropertiesToDate(obj[prop]);
       }
@@ -16,7 +17,7 @@ const convertObjectTimestampPropertiesToDate = (obj) => {
 
   return {
     ...obj,
-    newObj,
+    ...newObj,
   };
 };
 
@@ -114,7 +115,7 @@ export default (collectionPath) => {
     return {
       id,
       ...clonedData,
-      updateTimestamp,
+      updateTimestamp: new Date(),
     };
   };
 

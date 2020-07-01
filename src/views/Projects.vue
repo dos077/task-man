@@ -47,8 +47,8 @@
               :elevation="hover ? 3 : 0" tile
             >
               <footer class="body" :class="{'active': hover}"
-                :style="`background-color: ${time2color(proj.updateTimestamp.seconds)}`">
-                {{ showDate(proj.updateTimestamp.seconds) }}
+                :style="`background-color: ${time2color(proj.updateTimestamp)}`">
+                {{ showDate(proj.updateTimestamp) }}
                 <v-btn v-if="hover" class="ttl" color="#212121" text
                   @click="$router.push(`/project/${proj.id}`)"
                 >open</v-btn>
@@ -100,7 +100,7 @@ export default {
       return dues;
     },
     showDate(stamp) {
-      const date = new Date(stamp * 1000);
+      const date = new Date(stamp);
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
     },
@@ -112,7 +112,7 @@ export default {
         '#b2ebf2',
         '#eeeeee',
       ];
-      const date = new Date(time * 1000);
+      const date = new Date(time);
       const now = Date.now();
       const delta = Math.floor((now - date) / (1000 * 60 * 60 * 72));
       return (delta < 4) ? colors[delta] : colors[4];

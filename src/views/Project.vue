@@ -29,9 +29,10 @@
       <div class="menu-group">
         <div class="ttl title">Projects Controls</div>
         <v-btn
-        class="ttl"
-        text
-        color="#dcedc8"
+          class="ttl"
+          text
+          color="#dcedc8"
+          @click="newProj"
         >new project</v-btn>
         <v-btn
         class="ttl" text color="#fafafa"
@@ -43,11 +44,12 @@
         <div v-for="(proj, index) in recents" :key="index" class="body">
           <div class="ttl" style="margin-top: 8px;" >
             {{ proj.title }}
-            <v-btn small icon color="#eeeeee">
-              <v-icon>edit</v-icon></v-btn>
+            <v-btn small icon color="#eeeeee" :to="`/project/${proj.id}`">
+              <v-icon>edit</v-icon>
+            </v-btn>
           </div>
           <div>
-            {{ showDate(proj.updated) }}
+            {{ showDate(proj.updateTimestamp) }}
           </div>
         </div>
       </div>
@@ -104,6 +106,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import List from './components/List.vue';
+import BuildProject from '@/template/project';
 
 export default {
   name: 'Project',
@@ -118,10 +121,11 @@ export default {
       sortToggle: 0,
       editTitle: false,
       newTitle: '',
+      lastUpate: 0,
     };
   },
   computed: {
-    ...mapState('projects', { project: 'current' }),
+    ...mapState('projects', { project: 'current', projects: 'items' }),
     ...mapState('notes', { notes: 'items' }),
     lists() {
       if (!this.notes || this.notes.length === 0) return [[]];
@@ -153,10 +157,30 @@ export default {
       },
       immediate: true,
     },
+    projects: {
+      handler(to) {
+        if (to) {
+          this.recents = to.length > 3 ? to.slice(0, 3) : to;
+        }
+      },
+      immediate: true,
+    },
+    notes(to, from) {
+      const time = new Date();
+      if (from && time - this.lastUpate > 60000) {
+        this.lastUpate = time;
+        this.updateProject({ ...this.project });
+      }
+    },
   },
   methods: {
-    ...mapActions('projects', { readProject: 'read', updateProject: 'update' }),
+    ...mapActions('projects', { createProject: 'create', readProject: 'read', updateProject: 'update' }),
     ...mapActions('notes', { loadNotes: 'getAll' }),
+    async newProj() {
+      await this.createProject(BuildProject());
+      const newPath = `/project/${this.project.id}`;
+      this.$router.push({ path: newPath });
+    },
     async saveTitle() {
       if (this.newTitle !== this.project.title) {
         const updated = { ...this.project };

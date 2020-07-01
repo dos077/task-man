@@ -17,11 +17,12 @@ export default {
   }),
   computed: {
     ...mapState('authentication', ['user']),
+    ...mapState('projects', { projects: 'items' }),
   },
   watch: {
     user: {
-      handler(to) {
-        if (to) this.loadProjects();
+      handler(to, from) {
+        if (to && (!from || from.id !== to.id)) this.loadProjects();
         else this.setProjects(null);
       },
       immediate: true,
@@ -29,7 +30,7 @@ export default {
   },
   methods: {
     ...mapActions('projects', { loadProjects: 'getAll' }),
-    ...mapMutations('projects', { setProjects: 'set' }),
+    ...mapMutations('projects', { setProjects: 'set', sortProjects: 'sort' }),
   },
 };
 </script>
