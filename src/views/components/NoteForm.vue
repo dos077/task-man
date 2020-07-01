@@ -7,7 +7,7 @@
       style="width: 320px; padding: 16px;"
       :style="`background-color: ${background}; transition: background .5s;`"
     >
-      <v-form @submit="$emit('edit-done', noteCopy)">
+      <v-form @submit="save">
         <v-row no-gutters style="margin-bottom: -4px;"><v-col>
           <v-textarea
             label="Title"
@@ -87,7 +87,7 @@
               text
               color="#b71c1c"
               class="ttl"
-              @click="$emit('delete')"
+              @click="delNote(note.id)"
             >
               <v-icon>delete</v-icon>del
             </v-btn>
@@ -95,10 +95,11 @@
           <v-spacer></v-spacer>
           <v-col cols="auto">
             <v-btn
+              v-if="noteCopy.listIndex > 0"
               text
               color="#424242"
               class="ttl"
-              @click="$emit('rewind-note', noteCopy)"
+              @click="rewind"
             >
               re<v-icon>chevron_left</v-icon>
             </v-btn>
@@ -118,7 +119,7 @@
           color="#fafafa"
           small
           style="left: 140px;"
-          @click="$emit('edit-done', noteCopy)"
+          @click="save"
         >
           <v-icon color="#616161">done</v-icon>
         </v-btn>
@@ -154,13 +155,28 @@ export default {
     background() {
       return this.colors[this.noteCopy.color];
     },
+    isChange() {
+      return Object.keys(this.note).some(key => this.note[key] !== this.noteCopy[key]);
+    },
   },
   methods: {
     ...mapActions('notes', { update: 'update', delNote: 'delete' }),
-    finished() {
+    async rewind() {
+      if (this.noteCopy.listIndex > 0) {
+        this.noteCopy.listIndex -= 1;
+        await this.update({ ...this.noteCopy });
+      }
+      this.$emit('edit-done');
+    },
+    async finished() {
       this.noteCopy.due = null;
-      this.noteCopy.listOrder += 1;
-      this.update(this.noteCopy);
+      this.noteCopy.listIndex += 1;
+      await this.update({ ...this.noteCopy });
+      this.$emit('edit-done');
+    },
+    async save() {
+      if (this.isChange) await this.update({ ...this.noteCopy });
+      this.$emit('edit-done');
     },
   },
 };

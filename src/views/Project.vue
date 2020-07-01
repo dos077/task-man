@@ -125,15 +125,21 @@ export default {
     ...mapState('notes', { notes: 'items' }),
     lists() {
       if (!this.notes || this.notes.length === 0) return [[]];
-      const arr = [];
+      const nList = Math.max(...this.notes.map(n => n.listIndex));
+      const arr = new Array(nList);
+      for (let i = 0; i <= nList; i += 1) { arr[i] = []; }
       this.notes.forEach((n) => {
-        if (arr[n.listIndex]) arr.push(n);
-        else arr[n.listIndex] = [n];
+        arr[n.listIndex].push(n);
       });
       return arr;
     },
   },
   watch: {
+    sortToggle(to) {
+      const updated = { ...this.project };
+      updated.sortPref = to;
+      this.updateProject(updated);
+    },
     $route: {
       async handler(to) {
         const newId = to.params.pid;
@@ -141,8 +147,9 @@ export default {
         if (!this.project || newId !== this.project.id) {
           await this.readProject(newId);
           await this.loadNotes();
-          this.newTitle = this.project.title;
         }
+        this.newTitle = this.project.title;
+        if (this.project.sortPref) this.sortToggle = this.project.sortPref;
       },
       immediate: true,
     },
@@ -151,12 +158,12 @@ export default {
     ...mapActions('projects', { readProject: 'read', updateProject: 'update' }),
     ...mapActions('notes', { loadNotes: 'getAll' }),
     async saveTitle() {
-      this.editTitle = false;
-      if (!this.newTitle === this.project.title) {
+      if (this.newTitle !== this.project.title) {
         const updated = { ...this.project };
         updated.title = this.newTitle;
         await this.updateProject(updated);
       }
+      this.editTitle = false;
     },
     showDate(stamp) {
       const date = new Date(stamp);

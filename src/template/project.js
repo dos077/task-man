@@ -1,5 +1,5 @@
 export default () => ({
   title: 'New Project',
-  lists: [],
+  lists: {},
   nextNotes: 1,
 });

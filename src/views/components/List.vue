@@ -33,7 +33,6 @@
       </v-btn>
       <div v-for="(group, i) in groups" :key="i" class="group">
         <note v-for="note in group" :key="note.id" :note="note"
-          @delete="deleteNote(note.id)"
           @finish-note="$emit('note-done', note)"
           @rewind-note="$emit('note-rewind', note)"
           @new-update="$emit('new-update')"
@@ -48,6 +47,12 @@
 import { mapState, mapActions } from 'vuex';
 import Note from './Note.vue';
 import BuildNote from '@/template/note';
+
+const sortByDue = (a, b) => {
+  const aDue = (a.due) ? new Date(a.due) : 0;
+  const bDue = (b.due) ? new Date(b.due) : 0;
+  return aDue - bDue;
+};
 
 export default {
   name: 'List',
@@ -67,16 +72,15 @@ export default {
       return this.project.lists[this.index];
     },
     groups() {
+      const sortedNotes = [...this.notes].sort(sortByDue);
       let groups = [];
       if (this.sort === 0) {
-        this.sortNotes();
-        groups = [this.notes];
+        groups = [sortedNotes];
       }
       if (this.sort === 1) {
-        this.sortNotes();
         const pg = [];
         [4, 3, 2, 1, 0].forEach((c) => {
-          const notes = this.notes.filter(n => n.color === c);
+          const notes = sortedNotes.filter(n => n.color === c);
           if (notes.length > 0) pg.push(notes);
         });
         groups = pg;
@@ -94,21 +98,14 @@ export default {
     ...mapActions('projects', { updateProject: 'update' }),
     ...mapActions('notes', { createNote: 'create' }),
     async saveTitle() {
-      this.editTitle = false;
       if (this.newTitle && this.newTitle !== this.listTitle) {
         const updated = { ...this.project };
-        const updatedLists = [...updated.lists];
+        const updatedLists = { ...updated.lists };
         updatedLists[this.index] = this.newTitle;
         updated.lists = updatedLists;
         await this.updateProject(updated);
       }
-    },
-    sortNotes() {
-      this.notes.sort((a, b) => {
-        const aDue = (a.due) ? new Date(a.due) : 0;
-        const bDue = (b.due) ? new Date(b.due) : 0;
-        return aDue - bDue;
-      });
+      this.editTitle = false;
     },
     newNote() {
       const newNote = BuildNote(this.index);

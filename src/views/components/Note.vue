@@ -21,10 +21,7 @@
   <note-form
     v-if="edit"
     :note="note"
-    @edit-done="updateNote"
-    @delete="$emit('delete')"
-    @finish-note="finished"
-    @rewind-note="rewind"
+    @edit-done="edit = false"
   ></note-form>
 </v-scroll-x-transition>
 </template>
@@ -61,21 +58,6 @@ export default {
     soon() { return this.daysLeft < 6; },
   },
   methods: {
-    updateNote(copy) {
-      Object.keys(copy).forEach((key) => {
-        this.note[key] = copy[key];
-      });
-      this.edit = false;
-      this.$emit('new-update');
-    },
-    finished(copy) {
-      this.updateNote(copy);
-      this.$emit('finish-note');
-    },
-    rewind(copy) {
-      this.updateNote(copy);
-      this.$emit('rewind-note');
-    },
   },
 };
 </script>

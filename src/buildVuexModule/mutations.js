@@ -9,12 +9,22 @@ export default () => ({
 
   setColor: (state, color) => { state.color = color; },
 
-  add: (state, item) => state.items.push(item),
+  add: (state, item) => {
+    if (state.items) {
+      state.items.push(item);
+    } else {
+      state.items = item;
+    }
+  },
 
   update: (state, item) => {
     if (state.items && state.items.length > 0) {
       const index = state.items.findIndex(e => e.id === item.id);
-      if (index > -1) state.items[index] = item;
+      if (index > -1) {
+        const newItems = [...state.items];
+        newItems[index] = item;
+        state.items = newItems;
+      }
     }
     if (state.current && state.current.id === item.id) state.current = item;
   },
