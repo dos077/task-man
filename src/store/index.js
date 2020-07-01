@@ -4,6 +4,7 @@ import projects from './projects';
 import notes from './notes';
 import app from './app';
 import authentication from './authentication';
+import draggable from './draggable';
 
 Vue.use(Vuex);
 
@@ -14,5 +15,6 @@ export default new Vuex.Store({
     authentication,
     projects,
     notes,
+    draggable,
   },
 });

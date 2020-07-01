@@ -18,6 +18,12 @@
       ></v-textarea>
     </v-slide-x-transition>
     <div class="note-list">
+      <div
+        v-if="dragSource && dragSource.listIndex !== index"
+        class="drag-target"
+        :class="{ 'targeted': dragTarget === index }"
+        @dragenter="dragOver(index)"
+      />
       <v-btn
         fab
         absolute
@@ -44,7 +50,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapMutations } from 'vuex';
 import Note from './Note.vue';
 import BuildNote from '@/template/note';
 
@@ -68,6 +74,7 @@ export default {
   },
   computed: {
     ...mapState('projects', { project: 'current' }),
+    ...mapState('draggable', { dragSource: 'source', dragTarget: 'target' }),
     listTitle() {
       return this.project.lists[this.index];
     },
@@ -97,6 +104,7 @@ export default {
   methods: {
     ...mapActions('projects', { updateProject: 'update' }),
     ...mapActions('notes', { createNote: 'create' }),
+    ...mapMutations('draggable', ['dragOver']),
     async saveTitle() {
       if (this.newTitle && this.newTitle !== this.listTitle) {
         const updated = { ...this.project };
@@ -121,6 +129,7 @@ export default {
 
 <style lang="scss" scoped>
   .list-container {
+    position: relative;
     width: 336px;
     margin-right: 24px;
   }
@@ -143,6 +152,21 @@ export default {
     overflow: visible;
     .group {
       margin: 0 0 28px;
+    }
+  }
+  .drag-target {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 336px;
+    background-color: black;
+    opacity: 0.5;
+    &.targeted {
+      opacity: 0.8;
+      border: 0.5rem solid white;
     }
   }
 </style>
