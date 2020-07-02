@@ -50,7 +50,7 @@
                 :style="`background-color: ${time2color(proj.updateTimestamp)}`">
                 {{ showDate(proj.updateTimestamp) }}
                 <v-btn v-if="hover" class="ttl" color="#212121" text
-                  @click="$router.push(`/project/${proj.id}`)"
+                  @click="readProject(proj.id)"
                 >open</v-btn>
                 <v-btn v-if="hover" class="ttl" color="#c62828" text
                   @click="deleteProject(proj.id)"
@@ -80,12 +80,21 @@ export default {
   computed: {
     ...mapState('projects', { projects: 'items', current: 'current' }),
   },
+  watch: {
+    current(to) {
+      if (to) this.$router.push(`/project/${to.id}`);
+    },
+  },
   methods: {
-    ...mapActions('projects', { createProject: 'create', readAll: 'getAll', deleteProject: 'delete' }),
+    ...mapActions('projects', {
+      createProject: 'create',
+      readProject: 'read',
+      readAll: 'getAll',
+      deleteProject: 'delete',
+    }),
     async newProject() {
       const blank = ProjectTemplate();
-      await this.createProject(blank);
-      // this.$router.push({ path: `/projects/${this.current.id}` });
+      this.createProject(blank);
     },
     dueTasks(proj) {
       const dues = [];

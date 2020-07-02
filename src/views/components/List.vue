@@ -14,7 +14,9 @@
         auto-grow
         rows=1
         flat
+        :disabled="loading"
         @blur="saveTitle"
+        @keydown="keyDownHandl"
       ></v-textarea>
     </v-slide-x-transition>
     <div class="note-list">
@@ -33,6 +35,7 @@
         width="36"
         height="36"
         style="top: -18px; right: -2px;"
+        :disabled="loading"
         @click="newNote()"
       >
         <v-icon color="#616161">add</v-icon>
@@ -55,8 +58,8 @@ import Note from './Note.vue';
 import BuildNote from '@/template/note';
 
 const sortByDue = (a, b) => {
-  const aDue = (a.due) ? new Date(a.due) : 0;
-  const bDue = (b.due) ? new Date(b.due) : 0;
+  const aDue = (a.due !== null) ? new Date(a.due) : Infinity;
+  const bDue = (b.due !== null) ? new Date(b.due) : Infinity;
   return aDue - bDue;
 };
 
@@ -74,7 +77,13 @@ export default {
   },
   computed: {
     ...mapState('projects', { project: 'current' }),
+    ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('draggable', { dragSource: 'source', dragTarget: 'target' }),
+    loading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
+    },
     listTitle() {
       return this.project.lists[this.index];
     },
@@ -105,13 +114,18 @@ export default {
     ...mapActions('projects', { updateProject: 'update' }),
     ...mapActions('notes', { createNote: 'create' }),
     ...mapMutations('draggable', ['dragOver']),
-    async saveTitle() {
+    keyDownHandl(ev) {
+      if (ev.keyCode === 13) {
+        this.saveTitle();
+      }
+    },
+    saveTitle() {
       if (this.newTitle && this.newTitle !== this.listTitle) {
         const updated = { ...this.project };
         const updatedLists = { ...updated.lists };
         updatedLists[this.index] = this.newTitle;
         updated.lists = updatedLists;
-        await this.updateProject(updated);
+        this.updateProject(updated);
       }
       this.editTitle = false;
     },

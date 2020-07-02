@@ -1,7 +1,8 @@
 <template>
 <v-scroll-x-transition hide-on-leave>
-  <v-sheet
+  <v-card
     v-if="!edit"
+    :loading="loading"
     @click="edit = true"
     :color="colors[note.color]"
     :elevation="hover ? 4 : 0"
@@ -21,7 +22,7 @@
       <span class="note-body">{{note.body}}</span>
     </div>
     <div style="clear: both;"></div>
-  </v-sheet>
+  </v-card>
   <note-form
     v-if="edit"
     :note="note"
@@ -55,6 +56,12 @@ export default {
   },
   computed: {
     ...mapState('draggable', { dragOn: 'dragOn', dragSource: 'source', dragTarget: 'target' }),
+    ...mapState('notes', ['creationgPending', 'updatePending', 'deletionPending']),
+    loading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
+    },
     daysLeft() {
       if (this.note.due === null) return 999;
       const now = new Date();

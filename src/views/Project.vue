@@ -65,9 +65,16 @@
         <span v-if="!editTitle" class="ttl" @click="editTitle = true">
           {{ project.title }}
         </span>
-        <v-text-field v-if="editTitle" autofocus
+        <v-text-field
+          v-if="editTitle"
+          :disabled="loading"
+          autofocus
           style="font-size: 18px; margin-top: 12px;"
-          class="ttl" v-model="newTitle" @blur="saveTitle">
+          class="ttl"
+          v-model="newTitle"
+          @blur="saveTitle"
+          @keydown="keyDownHandl"
+        >
         </v-text-field>
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -78,10 +85,18 @@
         color="#212121"
         v-model="sortToggle"
       >
-        <v-btn height="36" class="ttl"
-        @click="sortToggle = 0">Date</v-btn>
-        <v-btn height="36" class="ttl"
-        @click="sortToggle = 1">Priority</v-btn>
+        <v-btn
+          height="36"
+          class="ttl"
+          :disabled="loading"
+          @click="sortToggle = 0"
+        >Date</v-btn>
+        <v-btn
+          height="36"
+          class="ttl"
+          :disabled="loading"
+          @click="sortToggle = 1"
+        >Priority</v-btn>
       </v-btn-toggle>
     </v-app-bar>
     <v-content
@@ -115,7 +130,6 @@ export default {
   },
   data() {
     return {
-      loading: false,
       drawerOn: null,
       recents: [],
       sortToggle: 0,
@@ -126,7 +140,13 @@ export default {
   },
   computed: {
     ...mapState('projects', { project: 'current', projects: 'items' }),
+    ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('notes', { notes: 'items' }),
+    loading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
+    },
     lists() {
       if (!this.notes || this.notes.length === 0) return [[]];
       const nList = Math.max(...this.notes.map(n => n.listIndex));
@@ -140,9 +160,11 @@ export default {
   },
   watch: {
     sortToggle(to) {
-      const updated = { ...this.project };
-      updated.sortPref = to;
-      this.updateProject(updated);
+      if (to === 0 || to === 1) {
+        const updated = { ...this.project };
+        updated.sortPref = to;
+        this.updateProject(updated);
+      }
     },
     $route: {
       async handler(to) {
@@ -150,11 +172,14 @@ export default {
         if (!newId) return;
         if (!this.project || newId !== this.project.id) {
           await this.readProject(newId);
-          await this.loadNotes();
         }
         this.newTitle = this.project.title;
         if (this.project.sortPref) this.sortToggle = this.project.sortPref;
       },
+      immediate: true,
+    },
+    project: {
+      handler() { this.loadNotes(); },
       immediate: true,
     },
     projects: {
@@ -181,11 +206,16 @@ export default {
       const newPath = `/project/${this.project.id}`;
       this.$router.push({ path: newPath });
     },
-    async saveTitle() {
+    keyDownHandl(ev) {
+      if (ev.keyCode === 13) {
+        this.saveTitle();
+      }
+    },
+    saveTitle() {
       if (this.newTitle !== this.project.title) {
         const updated = { ...this.project };
         updated.title = this.newTitle;
-        await this.updateProject(updated);
+        this.updateProject(updated);
       }
       this.editTitle = false;
     },

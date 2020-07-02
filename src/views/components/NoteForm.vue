@@ -1,13 +1,14 @@
 <template>
   <v-container style="width: 100%; padding: 0; margin: 8px 0 32px;">
-    <v-sheet
+    <v-card
       class="body"
       tile
       elevation="2"
+      :loading="loading"
       style="width: 320px; padding: 16px;"
       :style="`background-color: ${background}; transition: background .5s;`"
     >
-      <v-form @submit="save">
+      <v-form :disabled="loading" @submit="save">
         <v-row no-gutters style="margin-bottom: -4px;"><v-col>
           <v-textarea
             label="Title"
@@ -87,6 +88,7 @@
               text
               color="#b71c1c"
               class="ttl"
+              :disabled="loading"
               @click="delNote(note.id)"
             >
               <v-icon>delete</v-icon>del
@@ -99,6 +101,7 @@
               text
               color="#424242"
               class="ttl"
+              :disabled="loading"
               @click="rewind"
             >
               re<v-icon>chevron_left</v-icon>
@@ -107,7 +110,8 @@
               text
               color="#424242"
               class="ttl"
-              @click="finished()"
+              :disabled="loading"
+              @click="finished"
             >
               Fin<v-icon>double_arrow</v-icon>
             </v-btn>
@@ -119,17 +123,18 @@
           color="#fafafa"
           small
           style="left: 140px;"
+          :disabled="loading"
           @click="save"
         >
           <v-icon color="#616161">done</v-icon>
         </v-btn>
       </v-form>
-    </v-sheet>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 export default {
   name: 'NoteForm',
@@ -148,6 +153,12 @@ export default {
     };
   },
   computed: {
+    ...mapState('notes', ['creationgPending', 'updatePending', 'deletionPending']),
+    loading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
+    },
     dueDate() {
       if (!this.noteCopy.due) return 'None';
       return this.noteCopy.due;

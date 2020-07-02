@@ -4,20 +4,36 @@
       style="min-height: 100%;"
     >
     </router-view>
+    <v-snackbar
+      v-model="loadingBar"
+    >
+      <v-progress-linear
+      indeterminate color="#fafafa"
+      ></v-progress-linear>
+    </v-snackbar>
   </v-app>
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import {
+  mapState, mapActions, mapMutations,
+} from 'vuex';
 
 export default {
   name: 'App',
   data: () => ({
     //
+    loadingBar: false,
   }),
   computed: {
     ...mapState('authentication', ['user']),
     ...mapState('projects', { projects: 'items' }),
+    ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
+    projectsLoading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
+    },
   },
   watch: {
     user: {
@@ -26,6 +42,9 @@ export default {
         else this.setProjects(null);
       },
       immediate: true,
+    },
+    projectsLoading(to) {
+      this.loadingBar = to;
     },
   },
   methods: {
