@@ -25,6 +25,9 @@
         class="drag-target"
         :class="{ 'targeted': dragTarget === index }"
         @dragenter="dragOver(index)"
+        @dragover="(ev) => { ev.preventDefault(); }"
+        @dragleave="dragOver(null)"
+        v-on:drop="dropHandle"
       />
       <v-btn
         fab
@@ -41,7 +44,7 @@
         <v-icon color="#616161">add</v-icon>
       </v-btn>
       <div v-for="(group, i) in groups" :key="i" class="group">
-        <note v-for="note in group" :key="note.id" :note="note"
+        <note v-for="(note, j) in group" :key="j" :note="note"
           @finish-note="$emit('note-done', note)"
           @rewind-note="$emit('note-rewind', note)"
           @new-update="$emit('new-update')"
@@ -53,7 +56,9 @@
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex';
+import {
+  mapState, mapActions, mapMutations, mapGetters,
+} from 'vuex';
 import Note from './Note.vue';
 import BuildNote from '@/template/note';
 
@@ -70,6 +75,7 @@ export default {
     return {
       editTitle: false,
       newTitle: '',
+      tempNote: null,
     };
   },
   components: {
@@ -79,6 +85,7 @@ export default {
     ...mapState('projects', { project: 'current' }),
     ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('draggable', { dragSource: 'source', dragTarget: 'target' }),
+    ...mapGetters('notes', { getNote: 'getById' }),
     loading() {
       return this.creationPending
       || this.deletionPending.length > 0
@@ -87,8 +94,11 @@ export default {
     listTitle() {
       return this.project.lists[this.index];
     },
+    displayNotes() {
+      return this.tempNote ? [...this.notes, this.tempNote] : this.notes;
+    },
     groups() {
-      const sortedNotes = [...this.notes].sort(sortByDue);
+      const sortedNotes = [...this.displayNotes].sort(sortByDue);
       let groups = [];
       if (this.sort === 0) {
         groups = [sortedNotes];
@@ -109,15 +119,27 @@ export default {
       handler(to) { this.newTitle = to; },
       immediate: true,
     },
+    dragTarget(to) {
+      if (to !== null && to === this.index) this.tempNote = this.getNote(this.dragSource.id);
+      else this.tempNote = null;
+    },
   },
   methods: {
     ...mapActions('projects', { updateProject: 'update' }),
-    ...mapActions('notes', { createNote: 'create' }),
-    ...mapMutations('draggable', ['dragOver']),
+    ...mapActions('notes', { createNote: 'create', updateNote: 'update' }),
+    ...mapMutations('draggable', ['dragOver', 'dragEnd']),
     keyDownHandl(ev) {
       if (ev.keyCode === 13) {
         this.saveTitle();
       }
+    },
+    async dropHandle(ev) {
+      ev.preventDefault();
+      const note = this.getNote(this.dragSource.id);
+      const updated = { ...note };
+      updated.listIndex = this.index;
+      await this.updateNote(updated);
+      this.dragEnd();
     },
     saveTitle() {
       if (this.newTitle && this.newTitle !== this.listTitle) {
@@ -176,11 +198,12 @@ export default {
     width: 100%;
     height: 100%;
     min-height: 336px;
-    background-color: black;
-    opacity: 0.5;
+    border: 0.2rem solid white;
+    background: rgba(0, 0, 0, 0.33);
+    opacity: 0.4;
     &.targeted {
       opacity: 0.8;
-      border: 0.5rem solid white;
+      background: none;
     }
   }
 </style>

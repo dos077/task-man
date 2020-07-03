@@ -5,13 +5,14 @@
     :loading="loading"
     @click="edit = true"
     :color="colors[note.color]"
-    :elevation="hover ? 4 : 0"
+    :elevation="hover || dragging ? 4 : 0"
     class="body"
     :class="{ 'dragging': dragOn && dragSource.id === note.id }"
     tile
     style="width: 320px; margin-right: 16px; margin-bottom: 4px; position: relative;"
     draggable="true"
     @dragstart="downHandler"
+    @dragend="dragEnd"
     @mouseenter="!dragOn ? hover = true : null"
     @mouseleave="!dragOn ? hover = false : null"
   >
@@ -75,28 +76,22 @@ export default {
     },
   },
   beforeDestroy() {
-    document.removeEventListener('dragend', this.upHandler);
+    document.removeEventListener('dragend', this.endHandler);
   },
   methods: {
     ...mapMutations('draggable', ['dragStart', 'dragEnd']),
     ...mapActions('notes', { updateNote: 'update' }),
-    downHandler() {
+    downHandler(ev) {
       if (!this.dragOn) {
+        ev.dataTransfer.setData('text/plain', null);
         const { id, listIndex } = this.note;
         this.dragStart({ id, listIndex });
-        this.hover = true;
-        document.addEventListener('dragend', this.upHandler);
+        document.addEventListener('dragend', this.endHandler);
       }
     },
-    async upHandler() {
-      if (this.dragTarget !== null) {
-        const updated = { ...this.note };
-        updated.listIndex = this.dragTarget;
-        await this.updateNote(updated);
-      }
+    endHandler() {
+      document.removeEventListener('dragend', this.endHandler);
       this.dragEnd();
-      this.hover = false;
-      document.removeEventListener('dragend', this.upHandler);
     },
   },
 };

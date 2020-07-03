@@ -3,13 +3,38 @@
     <v-content>
       <div class="recents">
         <section>
-          <div class="section-title ttl">Recents</div>
+          <div class="section-title ttl">Account</div>
+          <v-hover v-slot:default="{ hover }">
+            <v-card
+              color="rgba(0,0,0,0)"
+              :elevation="hover ? 3: 0"
+              tile
+              class="sheet"
+            >
+              <p style="text-align: center;">
+                <v-avatar size="72" style="margin: 8px auto;">
+                  <img :src="user.photoURL" />
+                </v-avatar>
+              </p>
+              <footer class="body" style="background-color: #fafafa" :class="{'active': hover}">
+                {{ user.displayName }}
+                <v-btn v-if="hover" class="ttl" color="#c62828" text @click="logout">
+                  logout
+                </v-btn>
+              </footer>
+            </v-card>
+          </v-hover>
+          <div style="clear: both;"></div>
+        </section>
+      </div>
+      <div>
+        <section>
+          <div class="section-title ttl">All Projects</div>
           <v-hover v-slot:default="{ hover }">
             <v-sheet
               :color="hover ? '#fafafa' : '#e0e0e0'" class="sheet"
               :elevation="hover ? 3 : 0" tile
               @click="newProject"
-              style="cursor: pointer"
             >
               <p style="text-align: center;">
                 <v-icon color="#212121" style="font-size: 72px; margin: 8px auto;">
@@ -21,25 +46,6 @@
               </footer>
             </v-sheet>
           </v-hover>
-          <v-hover v-for="proj in recents" :key="proj.id"
-          v-slot:default="{ hover }">
-            <v-sheet
-              :color="hover ? '#fafafa' : '#e0e0e0'" class="sheet"
-              :elevation="hover ? 3 : 0" tile
-              @click="$router.push(`/project/${proj.id}`)"
-            >
-              <footer class="due body" v-if="dueTasks(proj).length > 0">
-                {{ dueTasks(proj).length }} Due Soon
-              </footer>
-              <div class="ttl title">{{ proj.title }}</div>
-            </v-sheet>
-          </v-hover>
-          <div style="clear: both;"></div>
-        </section>
-      </div>
-      <div>
-        <section>
-          <div class="section-title ttl">All Projects</div>
           <v-hover v-for="proj in projects" :key="proj.id"
           v-slot:default="{ hover }">
             <v-sheet
@@ -53,10 +59,25 @@
                   @click="readProject(proj.id)"
                 >open</v-btn>
                 <v-btn v-if="hover" class="ttl" color="#c62828" text
-                  @click="deleteProject(proj.id)"
+                  @click="deleteConfirms[proj.id] = true"
                 >delete</v-btn>
               </footer>
               <div class="ttl title">{{ proj.title }}</div>
+              <v-dialog v-model="deleteConfirms[proj.id]" max-width="480">
+                <v-card>
+                  <v-card-title class="red lighten-3" primary-title>
+                    Press to confirm
+                  </v-card-title>
+                  <v-card-text class="mt-2">
+                    {{ proj.title }} will be erased permanently.
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn text="" color="red darken-2" @click="deleteProject(proj.id)">
+                      confirm
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-sheet>
           </v-hover>
           <div style="clear: both;"></div>
@@ -68,6 +89,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
+import firebase from 'firebase/app';
 import ProjectTemplate from '@/template/project';
 
 export default {
@@ -75,10 +97,12 @@ export default {
   data() {
     return {
       recents: [],
+      deleteConfirms: {},
     };
   },
   computed: {
     ...mapState('projects', { projects: 'items', current: 'current' }),
+    ...mapState('authentication', ['user']),
   },
   watch: {
     current(to) {
@@ -126,6 +150,10 @@ export default {
       const delta = Math.floor((now - date) / (1000 * 60 * 60 * 72));
       return (delta < 4) ? colors[delta] : colors[4];
     },
+    async logout() {
+      await firebase.auth().signOut();
+      this.$router.push('/');
+    },
   },
   mounted() {
     document.title = 'Taskman';
@@ -166,13 +194,14 @@ export default {
     margin-bottom: 12px;
   }
   .sheet {
+    position: relative;
     width: 152px;
     height: 152px;
     overflow: hidden;
     margin: 0 12px 24px;
     float: left;
     padding: 12px 12px 52px;
-    position: relative;
+    cursor: pointer;
     transition: background-color .5s ease-out;
     footer {
       position: absolute;
