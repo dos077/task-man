@@ -1,86 +1,85 @@
 <template>
   <div>
-    <v-content>
+    <v-navigation-drawer
+      v-model="drawerOn"
+      dark
+      color="#424242"
+      app
+    >
+      <v-list-item two-line>
+        <v-list-item-avatar>
+          <img :src="user.photoURL" />
+        </v-list-item-avatar>
+
+        <v-list-item-content>
+          <v-list-item-title>{{ user.displayName }}</v-list-item-title>
+          <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-content>
+          <v-btn color="#c62828" @click="logout">
+            logout
+          </v-btn>
+        </v-list-item-content>
+      </v-list-item>
+    </v-navigation-drawer>
+    <v-content app>
       <div class="recents">
         <section>
-          <div class="section-title ttl">Account</div>
-          <v-hover v-slot:default="{ hover }">
-            <v-card
-              color="rgba(0,0,0,0)"
-              :elevation="hover ? 3: 0"
+          <div style="display: flex; justify-content: space-between">
+            <v-sheet
               tile
-              class="sheet"
+              color="#212121"
+              class="ttl logo"
             >
-              <p style="text-align: center;">
-                <v-avatar size="72" style="margin: 8px auto;">
-                  <img :src="user.photoURL" />
-                </v-avatar>
-              </p>
-              <footer class="body" style="background-color: #fafafa" :class="{'active': hover}">
-                {{ user.displayName }}
-                <v-btn v-if="hover" class="ttl" color="#c62828" text @click="logout">
-                  logout
-                </v-btn>
-              </footer>
-            </v-card>
-          </v-hover>
-          <div style="clear: both;"></div>
+              Task-Man
+            </v-sheet>
+            <v-btn dark text class="ttl my-3" color="#dcedc8" @click="newProject">
+              <v-icon>add</v-icon> new project
+            </v-btn>
+          </div>
+          <div class="section-title ttl">Account</div>
+          <div class="body mb-2" style="color: #fafafa;">
+            <span class="mr-2">{{ user.displayName }}</span> |
+            <span class="ml-2">{{ user.email }}</span>
+          </div>
+          <v-btn text class="ttl mb-4" color="red lighten-2" @click="logout">
+            logout
+          </v-btn>
+          <div style="clear: both;" />
         </section>
       </div>
-      <div>
+      <div style="padding-top: 24px;">
         <section>
           <div class="section-title ttl">All Projects</div>
-          <v-hover v-slot:default="{ hover }">
-            <v-sheet
-              :color="hover ? '#fafafa' : '#e0e0e0'" class="sheet"
-              :elevation="hover ? 3 : 0" tile
-              @click="newProject"
-            >
-              <p style="text-align: center;">
-                <v-icon color="#212121" style="font-size: 72px; margin: 8px auto;">
-                  add
-                </v-icon>
-              </p>
-              <footer style="background-color: #dcedc8" class="body">
-                New Project
-              </footer>
-            </v-sheet>
-          </v-hover>
-          <v-hover v-for="proj in projects" :key="proj.id"
-          v-slot:default="{ hover }">
-            <v-sheet
-              :color="hover ? '#fafafa' : '#eeeeee'" class="sheet"
-              :elevation="hover ? 3 : 0" tile
-            >
-              <footer class="body" :class="{'active': hover}"
-                :style="`background-color: ${time2color(proj.updateTimestamp)}`">
-                {{ showDate(proj.updateTimestamp) }}
-                <v-btn v-if="hover" class="ttl" color="#212121" text
-                  @click="readProject(proj.id)"
-                >open</v-btn>
-                <v-btn v-if="hover" class="ttl" color="#c62828" text
-                  @click="deleteConfirms[proj.id] = true"
-                >delete</v-btn>
-              </footer>
-              <div class="ttl title">{{ proj.title }}</div>
-              <v-dialog v-model="deleteConfirms[proj.id]" max-width="480">
-                <v-card>
-                  <v-card-title class="red lighten-3" primary-title>
-                    Press to confirm
-                  </v-card-title>
-                  <v-card-text class="mt-2">
-                    {{ proj.title }} will be erased permanently.
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn text="" color="red darken-2" @click="deleteProject(proj.id)">
-                      confirm
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-sheet>
-          </v-hover>
-          <div style="clear: both;"></div>
+          <div class="menu-list" v-for="proj in projects" :key="proj.id">
+            <span class="title ttl" @click="readProject(proj.id)">
+              {{ proj.title }}
+            </span>
+            <span class="body">|</span>
+            <span class="body">Last Updated {{ showDate(proj.updateTimestamp) }}</span>
+            <v-dialog v-model="deleteConfirms[proj.id]" max-width="480">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn class="ttl" text color="#c62828" v-bind="attrs" v-on="on">
+                  delete
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title class="red lighten-3" primary-title>
+                  Press to confirm
+                </v-card-title>
+                <v-card-text class="mt-2">
+                  {{ proj.title }} will be erased permanently.
+                </v-card-text>
+                <v-card-actions>
+                  <v-btn text="" color="red darken-2" @click="deleteProject(proj.id)">
+                    confirm
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </div>
         </section>
       </div>
     </v-content>
@@ -98,11 +97,17 @@ export default {
     return {
       recents: [],
       deleteConfirms: {},
+      idToDelete: null,
+      drawerOn: null,
     };
   },
   computed: {
     ...mapState('projects', { projects: 'items', current: 'current' }),
     ...mapState('authentication', ['user']),
+    projectToDelete() {
+      return this.idToDelete
+        ? this.projects.find(({ id }) => id === this.idToDelete) : null;
+    },
   },
   watch: {
     current(to) {
@@ -179,19 +184,18 @@ export default {
     }
   }
   .logo {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: block;
-    padding: 24px 12px 12px;
-    background-color: #212121;
-    color: #fafafa;
-    font-size: 38px;
+    display: inline-block;
+    height: 62px;
+    margin-left: -12px;
+    color: #fff;
+    font-size: 24px;
+    line-height: 30px;
+    padding: 16px 16px;
   }
   .recents {
     width: 100%;
-    background-color: #424242;
     margin-bottom: 12px;
+    background-color: #424242;
   }
   .sheet {
     position: relative;
@@ -203,6 +207,9 @@ export default {
     padding: 12px 12px 52px;
     cursor: pointer;
     transition: background-color .5s ease-out;
+    &.double{
+      width: 316px;
+    }
     footer {
       position: absolute;
       bottom: 0;
@@ -226,6 +233,25 @@ export default {
     .title {
       color: #212121;
       font-size: 24px;
+    }
+  }
+  .menu-list{
+    display: flex;
+    height: 36px;
+    margin-bottom: 12px;
+    align-items: center;
+    font-size: 18px;
+    color: #616161;
+    span {
+      margin-right: 12px;
+    }
+    .title {
+      font-size: 30px;
+      color: #212121;
+      cursor: pointer;
+      &:hover{
+        text-decoration: underline;
+      }
     }
   }
 </style>

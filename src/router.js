@@ -19,8 +19,8 @@ const router = new Router({
       component: Home,
       meta: { authNotRequired: true },
       beforeEnter: (to, from, next) => {
-        if (store.state.authentication.user !== null) next('/projects');
-        else next();
+        if (store.state.authentication.user == null) next();
+        else next('/projects');
       },
     },
     {
