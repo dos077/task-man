@@ -8,7 +8,7 @@
             <h4 class="ttl">Open Source Kanban Style Task Management</h4>
             <p class="body">Sign-in with your Google account to try the live beta</p>
             <p>
-              <v-btn class="ttl mr-4" to="/login">Sign up</v-btn>
+              <v-btn class="ttl mr-4" to="/login">Sign in</v-btn>
               <v-btn class="ttl" text href="https://github.com/dos077/task-man">
                 Github
               </v-btn>

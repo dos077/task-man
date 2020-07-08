@@ -53,6 +53,12 @@
           </div>
         </div>
       </div>
+      <div class="menu-group">
+        <div class="ttl title">Account</div>
+        <div class="body mx-2">{{ user.displayName }}</div>
+        <div class="body">{{ user.email }}</div>
+        <v-btn text class="ttl" color="red lighten-1" @click="logout">logout</v-btn>
+      </div>
     </v-navigation-drawer>
     <v-app-bar
       height="76px"
@@ -120,6 +126,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
+import firebase from 'firebase/app';
 import List from './components/List.vue';
 import BuildProject from '@/template/project';
 
@@ -142,6 +149,7 @@ export default {
     ...mapState('projects', { project: 'current', projects: 'items' }),
     ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('notes', { notes: 'items' }),
+    ...mapState('authentication', ['user']),
     loading() {
       return this.creationPending
       || this.deletionPending.length > 0
@@ -223,6 +231,10 @@ export default {
       const date = new Date(stamp);
       const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
       return `${months[date.getMonth()]} ${date.getDate()}`;
+    },
+    async logout() {
+      await firebase.auth().signOut();
+      this.$router.push('/');
     },
   },
 };

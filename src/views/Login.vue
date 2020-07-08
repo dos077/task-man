@@ -2,13 +2,13 @@
   <v-container fill-height>
     <v-row align-content="center" justify="center" style="height:100%;">
       <v-col cols="12" class="text-center">
-        <v-card max-width="480" style="margin: 0 auto;">
-          <v-toolbar color="primary" dark flat>
-            <v-toolbar-title>
-              Please Sign In
+        <v-card tile max-width="480" color="#eeeeee" style="margin: 0 auto;">
+          <v-toolbar color="#424242" dark flat>
+            <v-toolbar-title class="ttl">
+              Sign In Required
             </v-toolbar-title>
           </v-toolbar>
-          <v-card-text class="py-4 pb-8">
+          <v-card-text class="py-4 pb-8" style="color: #212121;">
             <!-- Loader -->
             <v-alert v-show="user === undefined" color="info">
               Authenticating...
@@ -28,14 +28,22 @@
               loginError
             }}</v-alert>
             <!-- Auth UI -->
+            <p class="ttl">
+              <!-- eslint-disable-next-line -->
+              Signning in with your Google account will verify and create a user collection in the demo Firestore. The only information the signin provide to this app is validation of your email address. No private information will be collected.
+            </p>
+            <p class="ttl mb-4">
+              <!-- eslint-disable-next-line -->
+              However, any project and task saved in the database is stored in plain text. I will be able to see everything in the Firebase admin console. Do not store anything in the demo database that you don't want public. Create a build using your own database for data security. Data encryption maybe added in the future, create an issue on Github if you want to contribute and make it happen.
+            </p>
             <v-btn
               light
               :disabled="user === undefined || !!user || !networkOnLine"
               data-test="login-btn"
               large
+              class="ttl"
               @click="login"
             >
-              <v-icon>mdi-google</v-icon>
               <span class="px-2">Sign in with google</span>
             </v-btn>
             <v-spacer />
