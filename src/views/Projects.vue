@@ -61,11 +61,17 @@
         <section>
           <div class="section-title ttl">All Projects</div>
           <div class="menu-list" v-for="proj in projects" :key="proj.id">
-            <span class="title ttl" @click="readProject(proj.id)">
+            <span
+              class="title ttl"
+              :class="{ md: $vuetify.breakpoint.smAndUp }"
+              @click="readProject(proj.id)"
+            >
               {{ proj.title }}
             </span>
-            <span class="body">|</span>
-            <span class="body">Last Updated {{ showDate(proj.updateTimestamp) }}</span>
+            <span v-if="$vuetify.breakpoint.smAndUp" class="body md">|</span>
+            <span class="body" :class="{ md: $vuetify.breakpoint.smAndUp }">
+              Last Updated {{ showDate(proj.updateTimestamp) }}
+            </span>
             <v-dialog v-model="deleteConfirms[proj.id]" max-width="480">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -93,6 +99,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+            <div style="clear: both;" />
           </div>
         </section>
       </div>
@@ -251,14 +258,18 @@ export default {
     }
   }
   .menu-list{
-    display: flex;
-    height: 36px;
-    margin-bottom: 12px;
+    margin-bottom: 18px;
     align-items: center;
     font-size: 18px;
     color: #616161;
     span {
+      display: block;
+      margin-left: 12px;
       margin-right: 12px;
+      &.md {
+        margin-left: 0;
+        display: inline-block;
+      }
     }
     .title {
       font-size: 30px;

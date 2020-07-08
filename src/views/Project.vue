@@ -55,7 +55,7 @@
       </div>
       <div class="menu-group">
         <div class="ttl title">Account</div>
-        <div class="body mx-2">{{ user.displayName }}</div>
+        <div class="body mt-2">{{ user.displayName }}</div>
         <div class="body">{{ user.email }}</div>
         <v-btn text class="ttl" color="red lighten-1" @click="logout">logout</v-btn>
       </div>
