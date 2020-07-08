@@ -35,7 +35,14 @@
             >
               Task-Man
             </v-sheet>
-            <v-btn dark text class="ttl my-3" color="#dcedc8" @click="newProject">
+            <v-btn
+              dark
+              text
+              class="ttl my-3"
+              color="#dcedc8"
+              @click="newProject"
+              :disabled="loading"
+            >
               <v-icon>add</v-icon> new project
             </v-btn>
           </div>
@@ -44,7 +51,7 @@
             <span class="mr-2">{{ user.displayName }}</span> |
             <span class="ml-2">{{ user.email }}</span>
           </div>
-          <v-btn text class="ttl mb-4" color="red lighten-2" @click="logout">
+          <v-btn text class="ttl mb-4" color="red lighten-2" @click="logout" :disabled="loading">
             logout
           </v-btn>
           <div style="clear: both;" />
@@ -61,7 +68,14 @@
             <span class="body">Last Updated {{ showDate(proj.updateTimestamp) }}</span>
             <v-dialog v-model="deleteConfirms[proj.id]" max-width="480">
               <template v-slot:activator="{ on, attrs }">
-                <v-btn class="ttl" text color="#c62828" v-bind="attrs" v-on="on">
+                <v-btn
+                  class="ttl"
+                  text
+                  color="#c62828"
+                  v-bind="attrs"
+                  v-on="on"
+                  :disabled="loading"
+                >
                   delete
                 </v-btn>
               </template>
@@ -97,16 +111,17 @@ export default {
     return {
       recents: [],
       deleteConfirms: {},
-      idToDelete: null,
       drawerOn: null,
     };
   },
   computed: {
     ...mapState('projects', { projects: 'items', current: 'current' }),
+    ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('authentication', ['user']),
-    projectToDelete() {
-      return this.idToDelete
-        ? this.projects.find(({ id }) => id === this.idToDelete) : null;
+    loading() {
+      return this.creationPending
+      || this.deletionPending.length > 0
+      || this.updatePending.length > 0;
     },
   },
   watch: {
