@@ -1,29 +1,5 @@
 <template>
   <div>
-    <v-navigation-drawer
-      v-model="drawerOn"
-      dark
-      color="#424242"
-      app
-    >
-      <v-list-item two-line>
-        <v-list-item-avatar>
-          <img :src="user.photoURL" />
-        </v-list-item-avatar>
-
-        <v-list-item-content>
-          <v-list-item-title>{{ user.displayName }}</v-list-item-title>
-          <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-content>
-          <v-btn color="#c62828" @click="logout">
-            logout
-          </v-btn>
-        </v-list-item-content>
-      </v-list-item>
-    </v-navigation-drawer>
     <v-content app>
       <div class="recents">
         <section>
@@ -118,7 +94,6 @@ export default {
     return {
       recents: [],
       deleteConfirms: {},
-      drawerOn: null,
     };
   },
   computed: {
