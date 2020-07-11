@@ -189,6 +189,10 @@ export default {
       if (this.isChange) await this.update({ ...this.noteCopy });
       this.$emit('edit-done');
     },
+    confirmDel() {
+      this.$emit('edit-done');
+      this.delNote(this.note.id);
+    },
   },
 };
 </script>

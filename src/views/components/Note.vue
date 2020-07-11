@@ -25,7 +25,7 @@
     <div style="clear: both;"></div>
   </v-card>
   <note-form
-    v-if="edit"
+    v-else
     :note="note"
     @edit-done="edit = false"
   ></note-form>
@@ -77,6 +77,9 @@ export default {
   },
   beforeDestroy() {
     document.removeEventListener('dragend', this.endHandler);
+  },
+  watch: {
+    note() { this.edit = false; },
   },
   methods: {
     ...mapMutations('draggable', ['dragStart', 'dragEnd']),
