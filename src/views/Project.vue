@@ -109,6 +109,8 @@
       style="background: #e0e0e0; overflow: auto; min-height: 100%;"
       app
     >
+      <v-btn @click="listenNotes">Listen to change</v-btn>
+      <v-btn @click="stopListen">stop listening</v-btn>
       <v-container fluid style="padding: 16px 24px 24px">
         <div
           class="lists"
@@ -143,6 +145,7 @@ export default {
       editTitle: false,
       newTitle: '',
       lastUpate: 0,
+      listening: false,
     };
   },
   computed: {
@@ -187,7 +190,15 @@ export default {
       immediate: true,
     },
     project: {
-      handler(to) { if (to) this.loadNotes(); },
+      handler(to) {
+        if (to) {
+          this.loadNotes();
+          if (!this.listening) {
+            this.listenNotes();
+            this.listening = true;
+          }
+        }
+      },
       immediate: true,
     },
     projects: {
@@ -207,8 +218,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions('projects', { createProject: 'create', readProject: 'read', updateProject: 'update' }),
-    ...mapActions('notes', { loadNotes: 'getAll' }),
+    ...mapActions(
+      'projects', {
+        createProject: 'create',
+        readProject: 'read',
+        updateProject: 'update',
+      },
+    ),
+    ...mapActions('notes', { loadNotes: 'getAll', listenNotes: 'listenAll', stopListen: 'stopListen' }),
     async newProj() {
       await this.createProject(BuildProject());
       const newPath = `/project/${this.project.id}`;

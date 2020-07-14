@@ -97,6 +97,25 @@ export default (collectionPath) => {
     return formatResult(await query.get()).filter(({ id }) => id !== 'meta');
   };
 
+  const listenAll = async (constraints = null, callBack) => {
+    const collectionRef = (await loadFirestore()).collection(collectionPath);
+    let query = collectionRef;
+
+    if (constraints) {
+      constraints.forEach((constraint) => {
+        query = query.where(...constraint);
+      });
+    }
+
+    return query.onSnapshot((res) => {
+      const formResult = res.docs.map(ref => convertObjectTimestampPropertiesToDate({
+        id: ref.id,
+        ...ref.data(),
+      }));
+      callBack(formResult);
+    });
+  };
+
   const update = async (data) => {
     const { id } = data;
     const clonedData = { ...data };
@@ -125,6 +144,6 @@ export default (collectionPath) => {
     .delete();
 
   return {
-    create, getMeta, updateMeta, read, readAll, update, remove,
+    create, getMeta, updateMeta, read, readAll, update, remove, listenAll,
   };
 };

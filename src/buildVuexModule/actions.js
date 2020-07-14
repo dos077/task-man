@@ -1,3 +1,5 @@
+let distachListener = null;
+
 export default ({ loadCollectionDB }) => ({
   getAll: async ({ rootState, commit }) => {
     const collectionDB = loadCollectionDB({ rootState });
@@ -15,9 +17,6 @@ export default ({ loadCollectionDB }) => ({
     commit('setCreationPending', false);
   },
 
-  /**
-   * Create a Gallerie for current loggedin user
-   */
   create: async ({ rootState, commit }, item) => {
     const collectionDB = loadCollectionDB({ rootState });
 
@@ -66,5 +65,37 @@ export default ({ loadCollectionDB }) => ({
     await collectionDB.remove(id);
     commit('removeById', id);
     commit('removeDeletionPending', id);
+  },
+
+  listenAll: async ({
+    rootState, getters, state, commit,
+  }) => {
+    if (!distachListener) {
+      const collectionDB = loadCollectionDB({ rootState });
+
+      const callBack = (items) => {
+        if (state.items && !getters.syncPending() && (
+          items.length !== state.items.length
+          || items.some((item) => {
+            const refIndex = state.items.findIndex(ref => ref.id === item.id);
+            if (refIndex < 0) return true;
+            if (item.updateTimestamp.getTime() > state.items[refIndex].updateTimestamp.getTime()) {
+              return true;
+            }
+            return false;
+          })
+        )) {
+          commit('set', items);
+        }
+      };
+      distachListener = await collectionDB.listenAll(null, callBack);
+    }
+  },
+
+  stopListen: () => {
+    if (distachListener) {
+      distachListener();
+      distachListener = null;
+    }
   },
 });
