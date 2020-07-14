@@ -4,7 +4,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/task-man/404.html"
   },
   {
-    "revision": "fad3ecfc247275975e68",
+    "revision": "b3a249eb136cf9307296",
     "url": "/task-man/css/app.9c5a7001.css"
   },
   {
@@ -16,12 +16,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/task-man/form.png"
   },
   {
-    "revision": "23a073e4bdbff36817e0085f04f70020",
+    "revision": "71053b754ca0e21eea5f7f7bf30ca82f",
     "url": "/task-man/index.html"
   },
   {
-    "revision": "fad3ecfc247275975e68",
-    "url": "/task-man/js/app.056b69f7.js"
+    "revision": "b3a249eb136cf9307296",
+    "url": "/task-man/js/app.7bceb618.js"
   },
   {
     "revision": "c75e719b0c9b0f7aac94",
