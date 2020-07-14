@@ -1,6 +1,7 @@
 module.exports = {
-  publicPath: '/task-man/',
+  publicPath: './',
   pwa: {
+    name: 'task-man',
     themeColor: '#424242',
   },
 };
