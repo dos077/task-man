@@ -18,10 +18,6 @@ const router = new Router({
       name: 'home',
       component: Home,
       meta: { authNotRequired: true },
-      beforeEnter: (to, from, next) => {
-        if (store.state.authentication.user == null) next();
-        else next('/projects');
-      },
     },
     {
       path: '/check-login',
@@ -47,7 +43,10 @@ const router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-  if (
+  if (to.path === '/') {
+    if (store.state.authentication.user == null) next();
+    else next('/projects');
+  } else if (
     !(to.meta && to.meta.authNotRequired)
     && store.state.authentication.user == null
   ) {
