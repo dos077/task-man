@@ -187,7 +187,7 @@ export default {
       immediate: true,
     },
     project: {
-      handler() { this.loadNotes(); },
+      handler(to) { if (to) this.loadNotes(); },
       immediate: true,
     },
     projects: {

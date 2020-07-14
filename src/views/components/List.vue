@@ -99,17 +99,20 @@ export default {
     },
     groups() {
       const sortedNotes = [...this.displayNotes].sort(sortByDue);
-      let groups = [];
+      const newIndex = sortedNotes
+        .findIndex(n => Date.now() - n.createTimestamp <= 1000);
+      const groups = [];
+      if (newIndex >= 0) {
+        groups.push(sortedNotes.splice(newIndex, 1));
+      }
       if (this.sort === 0) {
-        groups = [sortedNotes];
+        groups.push(sortedNotes);
       }
       if (this.sort === 1) {
-        const pg = [];
         [4, 3, 2, 1, 0].forEach((c) => {
           const notes = sortedNotes.filter(n => n.color === c);
-          if (notes.length > 0) pg.push(notes);
+          if (notes.length > 0) groups.push(notes);
         });
-        groups = pg;
       }
       return groups;
     },

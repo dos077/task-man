@@ -6,6 +6,7 @@ import vuetify from './plugins/vuetify';
 
 import '@/firebase/init';
 import '@/firebase/authentication';
+import './registerServiceWorker';
 
 Vue.config.productionTip = false;
 

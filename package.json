@@ -5,14 +5,16 @@
   "scripts": {
     "serve": "vue-cli-service serve --port 5000",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit"
+    "test:unit": "vue-cli-service test:unit",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^2.6.10",
     "firebase": "^7.15.4",
     "on-change": "^1.6.2",
+    "register-service-worker": "^1.7.1",
     "vue": "^2.6.10",
+    "vue-pwa-asset-generator": "^1.1.2",
     "vue-router": "^3.1.3",
     "vuetify": "^2.1.9",
     "vuex": "^3.0.1"
@@ -20,6 +22,7 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.12.1",
     "@vue/cli-plugin-eslint": "^3.12.1",
+    "@vue/cli-plugin-pwa": "^4.4.6",
     "@vue/cli-plugin-unit-jest": "^3.12.1",
     "@vue/cli-service": "^3.12.1",
     "@vue/eslint-config-airbnb": "^4.0.0",

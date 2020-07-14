@@ -79,7 +79,12 @@ export default {
     document.removeEventListener('dragend', this.endHandler);
   },
   watch: {
-    note() { this.edit = false; },
+    note(to) {
+      const newness = Date.now() - to.createTimestamp;
+      if (newness <= 1000) this.edit = true;
+      else this.edit = false;
+    },
+    immediate: true,
   },
   methods: {
     ...mapMutations('draggable', ['dragStart', 'dragEnd']),
