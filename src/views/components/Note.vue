@@ -81,7 +81,7 @@ export default {
   watch: {
     note(to) {
       const newness = Date.now() - to.createTimestamp;
-      if (newness <= 1000) this.edit = true;
+      if (newness <= 500) this.edit = true;
       else this.edit = false;
     },
     immediate: true,

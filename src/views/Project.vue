@@ -109,8 +109,6 @@
       style="background: #e0e0e0; overflow: auto; min-height: 100%;"
       app
     >
-      <v-btn @click="listenNotes">Listen to change</v-btn>
-      <v-btn @click="stopListen">stop listening</v-btn>
       <v-container fluid style="padding: 16px 24px 24px">
         <div
           class="lists"
@@ -193,10 +191,8 @@ export default {
       handler(to) {
         if (to) {
           this.loadNotes();
-          if (!this.listening) {
-            this.listenNotes();
-            this.listening = true;
-          }
+          this.stopListen();
+          this.listenNotes();
         }
       },
       immediate: true,
@@ -216,6 +212,9 @@ export default {
         this.updateProject({ ...this.project });
       }
     },
+  },
+  destroyed() {
+    this.stopListen();
   },
   methods: {
     ...mapActions(

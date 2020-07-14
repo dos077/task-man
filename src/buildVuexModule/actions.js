@@ -1,4 +1,4 @@
-let distachListener = null;
+let detachableListener = null;
 
 export default ({ loadCollectionDB }) => ({
   getAll: async ({ rootState, commit }) => {
@@ -70,7 +70,7 @@ export default ({ loadCollectionDB }) => ({
   listenAll: async ({
     rootState, getters, state, commit,
   }) => {
-    if (!distachListener) {
+    if (!detachableListener) {
       const collectionDB = loadCollectionDB({ rootState });
 
       const callBack = (items) => {
@@ -88,14 +88,14 @@ export default ({ loadCollectionDB }) => ({
           commit('set', items);
         }
       };
-      distachListener = await collectionDB.listenAll(null, callBack);
+      detachableListener = await collectionDB.listenAll(null, callBack);
     }
   },
 
   stopListen: () => {
-    if (distachListener) {
-      distachListener();
-      distachListener = null;
+    if (detachableListener) {
+      detachableListener();
+      detachableListener = null;
     }
   },
 });
