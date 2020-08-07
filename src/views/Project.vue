@@ -111,13 +111,13 @@
     >
       <v-container fluid style="padding: 16px 24px 24px">
         <div
-          class="lists"
-          :style="`width: ${360 * project.lists.length}px;`"
+          class="lists py-6"
+          :style="`width: ${360 * lists.length}px;`"
         >
           <list
             v-for="(list, i) in lists" :key="i" :notes="list" :sort="sortToggle" :index="i"
-          >
-          </list>
+          />
+          <div style="clear: both;" />
         </div>
       </v-container>
     </v-content>
@@ -260,7 +260,6 @@ export default {
   .lists {
     display: flex;
     min-height: 100%;
-    padding: 24px 0;
   }
   .label {
     display: inline-block;
