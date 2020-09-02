@@ -6,6 +6,6 @@ import buildGetters from './getters';
 export default config => ({
   state: buildState(),
   mutations: buildMutations(),
-  actions: buildActions(config),
+  actions: config ? buildActions(config) : {},
   getters: buildGetters(),
 });

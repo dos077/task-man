@@ -6,6 +6,7 @@ import Projects from './views/Projects.vue';
 import Home from './views/Home.vue';
 import CheckLogin from './views/CheckLogin.vue';
 import Login from './views/Login.vue';
+import Demo from './views/Demo.vue';
 
 Vue.use(Router);
 
@@ -38,6 +39,12 @@ const router = new Router({
       path: '/project/:pid',
       name: 'project',
       component: Project,
+    },
+    {
+      path: '/demo',
+      name: 'demo',
+      component: Demo,
+      meta: { authNotRequired: true },
     },
   ],
 });

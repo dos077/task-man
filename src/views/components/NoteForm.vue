@@ -134,7 +134,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapMutations } from 'vuex';
 
 export default {
   name: 'NoteForm',
@@ -154,6 +154,7 @@ export default {
   },
   computed: {
     ...mapState('notes', ['creationgPending', 'updatePending', 'deletionPending']),
+    ...mapState('demo', { demo: 'on' }),
     loading() {
       return this.creationPending
       || this.deletionPending.length > 0
@@ -172,6 +173,7 @@ export default {
   },
   methods: {
     ...mapActions('notes', { update: 'update', delNote: 'delete' }),
+    ...mapMutations('demo', { demoUpdate: 'updateNote', demoDel: 'delNote' }),
     async rewind() {
       if (this.noteCopy.listIndex > 0) {
         this.noteCopy.listIndex -= 1;
@@ -182,16 +184,30 @@ export default {
     async finished() {
       this.noteCopy.due = null;
       this.noteCopy.listIndex += 1;
-      await this.update({ ...this.noteCopy });
+      if (this.demo) {
+        this.demoUpdate({ ...this.noteCopy });
+      } else {
+        await this.update({ ...this.noteCopy });
+      }
       this.$emit('edit-done');
     },
     async save() {
-      if (this.isChange) await this.update({ ...this.noteCopy });
+      if (this.isChange) {
+        if (this.demo) {
+          this.demoUpdate({ ...this.noteCopy });
+        } else {
+          await this.update({ ...this.noteCopy });
+        }
+      }
       this.$emit('edit-done');
     },
     confirmDel() {
       this.$emit('edit-done');
-      this.delNote(this.note.id);
+      if (this.demo) {
+        this.demoDel(this.note.id);
+      } else {
+        this.delNote(this.note.id);
+      }
     },
   },
 };

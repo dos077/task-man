@@ -7,12 +7,12 @@
             <v-col :cols="lgCols" class="text-block">
               <h2 class="ttl">Task-man</h2>
               <h4 class="ttl">Open Source Kanban Style Task Management</h4>
-              <p class="body">Sign-in with your Google account to try the live beta</p>
+              <p class="body">
+                Play with the demo project or sign-in with your Google account to try the live beta
+              </p>
               <p>
+                <v-btn class="ttl mr-4" to="/demo">Demo</v-btn>
                 <v-btn class="ttl mr-4" to="/login">Sign in</v-btn>
-                <v-btn class="ttl" text href="https://github.com/dos077/task-man">
-                  Github
-                </v-btn>
               </p>
             </v-col>
             <v-col :cols="lgCols" class="image-block">

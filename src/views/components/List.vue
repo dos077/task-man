@@ -44,12 +44,13 @@
         <v-icon color="#616161">add</v-icon>
       </v-btn>
       <div v-for="(group, i) in groups" :key="i" class="group">
-        <note v-for="(note, j) in group" :key="j" :note="note"
+        <note
+          v-for="(note, j) in group" :key="j"
+          :note="note"
           @finish-note="$emit('note-done', note)"
           @rewind-note="$emit('note-rewind', note)"
           @new-update="$emit('new-update')"
-        >
-        </note>
+        />
       </div>
     </div>
   </div>
@@ -86,12 +87,18 @@ export default {
     ...mapState('projects', ['creationgPending', 'updatePending', 'deletionPending']),
     ...mapState('draggable', { dragSource: 'source', dragTarget: 'target' }),
     ...mapGetters('notes', { getNote: 'getById' }),
+    ...mapState('demo', { demoProject: 'project', demoNotes: 'notes', demo: 'on' }),
     loading() {
       return this.creationPending
       || this.deletionPending.length > 0
       || this.updatePending.length > 0;
     },
     listTitle() {
+      if (this.demo) {
+        return this.demoProject
+          ? this.demoProject.lists[this.index]
+          : '';
+      }
       return this.project.lists[this.index];
     },
     displayNotes() {
@@ -123,14 +130,22 @@ export default {
       immediate: true,
     },
     dragTarget(to) {
-      if (to !== null && to === this.index) this.tempNote = this.getNote(this.dragSource.id);
-      else this.tempNote = null;
+      if (to !== null && to === this.index) {
+        if (this.demo) {
+          this.tempNote = this.demoNotes.find(n => n.id === this.dragSource.id);
+        } else {
+          this.tempNote = this.getNote(this.dragSource.id);
+        }
+      } else this.tempNote = null;
     },
   },
   methods: {
     ...mapActions('projects', { updateProject: 'update' }),
     ...mapActions('notes', { createNote: 'create', updateNote: 'update' }),
     ...mapMutations('draggable', ['dragOver', 'dragEnd']),
+    ...mapMutations('demo', {
+      createDemo: 'createNote', updateDemoNote: 'updateNote', updateDemoProj: 'updateProject',
+    }),
     keyDownHandl(ev) {
       if (ev.keyCode === 13) {
         this.saveTitle();
@@ -138,25 +153,37 @@ export default {
     },
     async dropHandle(ev) {
       ev.preventDefault();
-      const note = this.getNote(this.dragSource.id);
+      const note = this.demo
+        ? this.demoNotes.find(n => n.id === this.dragSource.id)
+        : this.getNote(this.dragSource.id);
       const updated = { ...note };
       updated.listIndex = this.index;
-      await this.updateNote(updated);
+      if (this.demo) {
+        this.updateDemoNote(updated);
+      } else {
+        await this.updateNote(updated);
+      }
       this.dragEnd();
     },
     saveTitle() {
       if (this.newTitle && this.newTitle !== this.listTitle) {
-        const updated = { ...this.project };
+        const updated = !this.demo ? { ...this.project } : { ...this.demoProject };
         const updatedLists = { ...updated.lists };
         updatedLists[this.index] = this.newTitle;
         updated.lists = updatedLists;
-        this.updateProject(updated);
+        if (this.demo) {
+          this.updateDemoProj(updated);
+        } else {
+          this.updateProject(updated);
+        }
       }
       this.editTitle = false;
     },
     newNote() {
       const newNote = BuildNote(this.index);
-      this.createNote(newNote);
+      if (this.demo) {
+        this.createDemo(newNote);
+      } else { this.createNote(newNote); }
     },
     deleteNote(noteId) {
       this.list.delNote(noteId);
